@@ -2,12 +2,12 @@ const sequelize=require('../database/db')
 const Sequelize=require('sequelize')
 const bcrypt=require('bcrypt')
 const Auth=require('../models/auth')
+const jwt=require('jsonwebtoken') 
 
 
 postSignUpAuthentication=async(req,res,next)=>{
     
     try{
-
       const checkCredentials= await searchCredentials({
          email:req.body.email,
          phone:req.body.phone
@@ -39,20 +39,37 @@ postSignUpAuthentication=async(req,res,next)=>{
     }
     else
       throw new Error(checkCredentials.error)
-    
 
     }
     catch(error){
         console.log(error.message)
         return res.status(500).json({error:error.message})
     } 
-    
-
-
-
-
 }
 
+postSignInAuthentication=async(req,res,next)=>{
+      const signInData={
+        email:req.body.email,
+        password:req.body.password
+      }
+     try{
+        const user=await Auth.findAll({where:{email:signInData.email}})
+
+        bcrypt.compare(signInData.password,user[0].password,(err,response)=>{
+            if(err)
+                 throw new Error(err)
+            if(response)
+                {
+                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id),email:user[0].email})
+                }    
+        })
+         
+        
+     }
+     catch(error){
+         return res.status(500).json({error:error.message})
+     }
+}
 
 const searchCredentials=(data)=>{
    return new Promise(async(resolve,reject)=>{
@@ -80,4 +97,8 @@ const searchCredentials=(data)=>{
    })
 }
 
-module.exports={postSignUpAuthentication}
+const generateAccessToken=(userId)=>{
+    return jwt.sign({userId:userId},'wuCCWAcqs7yGQm82QhuXTJep6hRqMUdZQfqSFaVSZHwY3I5kHLpRqWRtFdRKDqJ')
+}
+
+module.exports={postSignUpAuthentication,postSignInAuthentication}

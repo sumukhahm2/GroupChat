@@ -1,5 +1,7 @@
 import {Button,Form} from 'react-bootstrap'
 import {useState,useRef} from 'react'
+import { useDispatch } from 'react-redux'
+import { authAction } from '../../store/AuthenticationSlice'
 
 const Login=()=>{
 
@@ -9,38 +11,64 @@ const Login=()=>{
   const confirmPasswordref=useRef()
   const phoneRef=useRef()
 
+  const dispatch=useDispatch()
+
   const [error,setError]=useState(null)
   const [message,setMessage]=useState(null)
+ const [isSignUp,setState]=useState(true)
 
-
-  const handleSignupForm=async(event)=>{
+  const handleSubmitForm=async(event)=>{
       event.preventDefault()
-     
-      try{
-
-        const signUpData={
-          name:nameRef.current.value,
-          email:emailRef.current.value,
-          password:passwordRef.current.value,
-          phone:phoneRef.current.value
-        }
-        const response=await fetch('http://localhost:4000/groupchat/signup',
-          {
-            method:'POST',
-            body:JSON.stringify(signUpData),
-            headers:{
-              'Content-Type':'application/json'
-            }
+  try{
+      let response
+     if(isSignUp) 
+     {
+      const signUpData={
+        name:nameRef.current.value,
+        email:emailRef.current.value,
+        password:passwordRef.current.value,
+        phone:phoneRef.current.value
+      }
+       response=await fetch('http://localhost:4000/groupchat/signup',
+        {
+          method:'POST',
+          body:JSON.stringify(signUpData),
+          headers:{
+            'Content-Type':'application/json'
           }
-        )
-         const data=await response.json()
+        }
+      )
+     }
+     else{
+        const signInData={
+          email:emailRef.current.value,
+          password:passwordRef.current.value
+        }
+
+        response=await fetch('http://localhost:4000/groupchat/signin',{
+          method:'POST',
+          body:JSON.stringify(signInData),
+          headers:{
+            'Content-Type':'application/json'
+          }
+        })
+     }
+      const data=await response.json()
 
          if(data && data.error)
          {
           throw new Error(data.error)
          }
          else if(data && data.message)
+         {
+            if(isSignUp)
             setMessage(data.message)
+            else 
+            {
+              alert(data.message)
+              dispatch(authAction.signIn({email:data.email,token:data.token}))
+            }
+         }
           else 
             throw new Error('Something Went Wrong')
         
@@ -58,14 +86,14 @@ const Login=()=>{
 
     return(
         <div>
-    <Form className='text-center' onSubmit={handleSignupForm}>
+    <Form className='text-center' onSubmit={handleSubmitForm}>
         
-        <Form.Text className='fs-2 text-warning'>Register Here</Form.Text>
+        <Form.Text className='fs-2 text-warning'>{isSignUp?'Register Here':'Login Here'}</Form.Text>
         <h5 className={message?'text-success':'text-danger'}>{message?message:error}</h5>
-        <Form.Group className="mb-3 " >
+        {isSignUp && <Form.Group className="mb-3 " >
         <Form.Label>Name</Form.Label>
         <Form.Control type="text" placeholder="Enter Your Name"  ref={nameRef} required/>
-      </Form.Group>
+      </Form.Group>}
       <Form.Group className="mb-3 " controlId="formBasicEmail">
         <Form.Label>Email address</Form.Label>
         <Form.Control type="email" placeholder="Enter email"  ref={emailRef} required />
@@ -78,17 +106,19 @@ const Login=()=>{
         <Form.Label>Password</Form.Label>
         <Form.Control type="password" placeholder="Password"  ref={passwordRef} required/>
       </Form.Group>
-      <Form.Group className="mb-3" >
+      {isSignUp && <Form.Group className="mb-3" >
         <Form.Label>Confirm Password</Form.Label>
         <Form.Control type="password" placeholder="Confirm Password" ref={confirmPasswordref} required/>
-      </Form.Group>
-      <Form.Group className="mb-3" controlId="phone">
+      </Form.Group>}
+      {isSignUp && <Form.Group className="mb-3" controlId="phone">
         <Form.Label>Phone Number</Form.Label>
         <Form.Control type="number" placeholder="Phone Number" ref={phoneRef} required/>
-      </Form.Group>
+      </Form.Group>}
       <Button variant="warning" type="submit" className='text-dark ' >
-        SignUp
+        {isSignUp?'SignUp':'Login'}
       </Button>
+
+      <button className='m-2 pe-auto  border-0 bg-transparent text-info' onClick={()=>{ setState((prev)=>!prev) }}>{isSignUp?"Already Have An Account?":"Don't Have An Account?"}</button>
     </Form>
 
         </div>
