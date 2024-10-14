@@ -54,15 +54,28 @@ postSignInAuthentication=async(req,res,next)=>{
       }
      try{
         const user=await Auth.findAll({where:{email:signInData.email}})
-
-        bcrypt.compare(signInData.password,user[0].password,(err,response)=>{
+   
+       if(user.length!==0)
+       {
+         bcrypt.compare(signInData.password,user[0].password,(err,response)=>{
             if(err)
-                 throw new Error(err)
+            {
+                console.log(err)
+                 
+            }
+            
             if(response)
-                {
+            {
                     return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id),email:user[0].email})
-                }    
+             } 
+             else if(!response)
+                return res.status(401).json({error:'Password MisMatch'}) 
+              
         })
+      }
+      else{
+        return res.status(404).json({error:'User Not Found'})
+      }
          
         
      }
