@@ -2,6 +2,7 @@ import {Button,Form} from 'react-bootstrap'
 import {useState,useRef} from 'react'
 import { useDispatch } from 'react-redux'
 import { authAction } from '../../store/AuthenticationSlice'
+import { useNavigate } from 'react-router-dom'
 
 const Login=()=>{
 
@@ -12,6 +13,8 @@ const Login=()=>{
   const phoneRef=useRef()
 
   const dispatch=useDispatch()
+
+  const navigate=useNavigate()
 
   const [error,setError]=useState(null)
   const [message,setMessage]=useState(null)
@@ -67,6 +70,7 @@ const Login=()=>{
             {
               alert(data.message)
               dispatch(authAction.signIn({email:data.email,token:data.token}))
+              navigate('/home')
             }
          }
           else 
