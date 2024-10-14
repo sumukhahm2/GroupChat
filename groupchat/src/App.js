@@ -12,6 +12,7 @@ function App() {
 
   const dispatch=useDispatch()
   useEffect(()=>{
+      
        dispatch(authAction.signIn({email:localStorage.getItem('email'),token:localStorage.getItem('token')}))
   },[])
 
@@ -25,7 +26,7 @@ function App() {
       <main className='main'>
         <Routes>
          <Route path='/' element={<Login/>}/>
-        {isLogin && <Route path='/home' element={<ChatHome/>}/>}
+       {isLogin && <Route path='/home' element={<ChatHome/>}/>}
         </Routes>
         
       </main>

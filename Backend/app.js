@@ -9,6 +9,10 @@ const sequelize=require('./database/db')
 
 const bodyparser=require('body-parser')
 
+const Auth=require('./models/auth')
+
+const Chat=require('./models/chat')
+
 const helmet=require('helmet')
 
 const morgan=require('morgan')
@@ -16,6 +20,8 @@ const morgan=require('morgan')
 const cors=require('cors')
 
 const authRoute=require('./routes/auth')
+
+const chatRoute=require('./routes/chat')
 
 const app=express()
 
@@ -29,6 +35,10 @@ app.use(bodyparser.json())
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(authRoute)
+app.use(chatRoute)
+
+Auth.hasMany(Chat)
+Chat.belongsTo(Auth)
 
 app.use(helmet()) 
 app.use(morgan('tiny'))
