@@ -1,6 +1,8 @@
 import { Button, Container,Form } from "react-bootstrap"
 import './ChatHome.css'
 import {useRef, useState} from 'react'
+import { useDispatch,useSelector } from "react-redux"
+import { chatAction } from "../../store/ChatSlice"
 
 
 const ChatHome=()=>{
@@ -8,6 +10,11 @@ const ChatHome=()=>{
     const chatRef=useRef()
     const [error,setError]=useState(null)
 
+    const dispatch=useDispatch()
+
+    const messages=useSelector(state=>state.chat.messages)
+
+     console.log(messages)
     const handleSendMessage=async(e)=>{
        e.preventDefault()
        console.log(chatRef.current.value)
@@ -27,9 +34,16 @@ const ChatHome=()=>{
 
             const data=await response.json()
             console.log(data)
+            if(data && data.error)
+                throw new Error(data.error)
+            if(data)
+            {
+              dispatch(chatAction.addMessages(chatData))
+            }
+            
        }
        catch(error){
-           setError(error)
+           setError(error.message)
        }
        
     }
@@ -37,8 +51,13 @@ const ChatHome=()=>{
     return(
         <Container className="text-center">
              <h2>Chat App</h2>
+             {error && <p>{error}</p>}
             <div className="chatspace">
                 <h6>You Joined</h6>
+                {messages.map(msg=>
+                   <h6>{msg.message}</h6>
+                )}
+                
            </div> 
 
          <div >

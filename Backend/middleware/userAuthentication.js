@@ -19,3 +19,5 @@ userAuthentication=async(req,res,next)=>{
 
     }
 }
+
+module.exports={userAuthentication}

@@ -12,7 +12,11 @@ postMessages=async(req,res,next)=>{
         }
        const response=await Chat.create({...chatData})
 
-       console.log(response)
+       if(response){
+        res.status(201).json({message:'Message sent Successfully'})
+       }
+       else 
+         throw new Error("Something went Wrong")
     }
     catch(error){
        res.status(500).json({error:error.message})
@@ -20,4 +24,35 @@ postMessages=async(req,res,next)=>{
 
 }
 
-module.exports={postMessages}
+getAllMessages=async(req,res,next)=>
+{
+    try{
+        const messages=await Chat.findAll()
+
+        if(messages)
+           res.status(201).json({messages:messages})
+        else 
+           res.status(404).json({error:'No messages Found'})
+    }
+    catch(error)
+    {
+       res.status(500).json({error:error})
+    }
+}
+
+getMessages=async(req,res,next)=>{
+    try{
+        //console.log(req.user)
+       const messages=await req.user.getChats()
+       console.log(messages)
+       if(messages.length>0)
+         return res.status(201).json({messages:messages})
+       else 
+       return res.status(404).json({error:"No Messages Found"})
+    }
+    catch(error){
+        res.status(500).json({error:error})
+    }
+}
+
+module.exports={postMessages,getMessages,getAllMessages}
