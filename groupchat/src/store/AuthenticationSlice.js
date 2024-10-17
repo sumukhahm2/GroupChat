@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 const defaultValues={
-    isLogin:false,
+    isLogin:localStorage.getItem('token')?true:false,
+   
 }
 
 
@@ -15,8 +16,14 @@ const AuthenticationSlice=createSlice({
             
             localStorage.setItem('email',action.payload.email)
             localStorage.setItem('token',action.payload.token)
+            localStorage.setItem('messages',[])
              state.isLogin=true
             
+          },
+          keepLogin(state,action){
+            localStorage.setItem('email',action.payload.email)
+            localStorage.setItem('token',action.payload.token)
+             state.isLogin=true
           }
 
     }

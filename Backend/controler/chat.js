@@ -1,3 +1,4 @@
+const { Op } = require('sequelize')
 const Chat=require('../models/chat')
 const jwt=require('jsonwebtoken')
 postMessages=async(req,res,next)=>{
@@ -11,9 +12,9 @@ postMessages=async(req,res,next)=>{
             authId:data.userId
         }
        const response=await Chat.create({...chatData})
-
+      
        if(response){
-        res.status(201).json({message:'Message sent Successfully'})
+        res.status(201).json({message:response.dataValues})
        }
        else 
          throw new Error("Something went Wrong")
@@ -27,16 +28,35 @@ postMessages=async(req,res,next)=>{
 getAllMessages=async(req,res,next)=>
 {
     try{
-        const messages=await Chat.findAll()
-
-        if(messages)
-           res.status(201).json({messages:messages})
-        else 
-           res.status(404).json({error:'No messages Found'})
+       const messageId=parseInt(req.query.lastmessageid)
+       //console.log(messageId)
+       if(messageId>=0)
+       {
+        console.log('how'+messageId)
+        
+         const messages=await Chat.findAll({where:{id:{[Op.gt]:messageId}}})
+         //console.log(messages)
+         let msgId
+        if(messages.length>0)
+          msgId=messages[messages.length-1].id
+        console.log('hello'+msgId)
+         //console.log(msgId!=messageId)
+         if(messages.length>0 && msgId!=messageId)
+         {
+            
+            //console.log(messages)
+            return res.status(201).json({messages:messages,status:true})
+         }
+         else
+         {
+            console.log('how')
+           return res.status(201).json({status:false})
+         }
+            
+       }
     }
-    catch(error)
-    {
-       res.status(500).json({error:error})
+    catch(error){
+
     }
 }
 

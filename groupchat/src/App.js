@@ -10,19 +10,41 @@ import { chatAction } from './store/ChatSlice';
 import useFetch from './CustomHooks/useFetch';
 
 function App() {
+  const isLogin=useSelector(state=>state.auth.isLogin)
 
-  const {data,error,loading}=useFetch('http://localhost:4000/groupchat/allchats')
-  console.log(data)
   const dispatch=useDispatch()
+
   useEffect(()=>{
       
-       dispatch(authAction.signIn({email:localStorage.getItem('email'),token:localStorage.getItem('token')}))
-       
-  },[])
+    dispatch(authAction.keepLogin({email:localStorage.getItem('email'),token:localStorage.getItem('token')}))
+    
+},[])
 
+let lastId={id:null}
+
+  if(isLogin && localStorage.getItem('messages') && JSON.parse(localStorage.getItem('messages')).length)
+  {
+    const messages=JSON.parse(localStorage.getItem('messages'))
+    console.log(JSON.parse(localStorage.getItem('messages')).length)
+
+     lastId=messages[messages.length-1]
+      
+  }
+  else
+  {
+    console.log(isLogin  )
+    lastId={id:0}
+  }
+   
+
+  useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${parseInt(lastId.id)}`,lastId.id)
+ 
+ 
   
 
-  const isLogin=useSelector(state=>state.auth.isLogin)
+  
+//console.log(JSON.parse(localStorage.getItem('messages')).length)
+ 
   console.log(isLogin)
   return (
     <div className="App">

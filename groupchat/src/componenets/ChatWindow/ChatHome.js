@@ -38,7 +38,7 @@ const ChatHome=()=>{
                 throw new Error(data.error)
             if(data)
             {
-              dispatch(chatAction.addMessages(chatData))
+              dispatch(chatAction.addMessages(data.message))
             }
             
        }
