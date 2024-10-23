@@ -2,57 +2,94 @@ import {useState,useEffect,useCallback } from 'react'
 import { useDispatch,useSelector } from 'react-redux'
 import { chatAction } from '../store/ChatSlice'
 
-const useFetch=(url,id)=>{
+const useFetch=(url,type,props)=>{
     
-   // const [state,setState]=useState({dta:null,error:null,loading:true})
+   const [state,setState]=useState({data:null,error:null,loading:true,status:false})
      const dispatch=useDispatch()
-     //const messages=useSelector(state=>state.chat.messages)
+     const islogin=useSelector(state=>state.auth.isLogin)
+
+     console.log(url)
     useEffect(()=>{
          
         async function getDatas(){
-          
-            const response=await fetch(url)
-            const data=await response.json()
-            console.log(data)
-            if(id===0 && data)
+            
+            const response=await fetch(url,{
+              headers:{
+                'Authorization':localStorage.getItem('token')
+              }
+            })
+            const fetchedData=await response.json()
+            console.log(fetchedData)
+          if(fetchedData)
+          {
+            
+            if(type==='ALL_CHATS')
             {
-                console.log('data first time')
-                 localStorage.setItem('messages',JSON.stringify(data.messages))
-                 dispatch(chatAction.addAllMessages(data.messages))
+              console.log(fetchedData.id)
+              if(fetchedData.id===0 && fetchedData.data)
+                  {
+                      console.log('data first time')
+                      
+                      localStorage.setItem('messages',JSON.stringify(fetchedData.data))
+                      dispatch(chatAction.addAllMessages(fetchedData.data))
+                  }
+                  else if(fetchedData.status )
+                  {
+                      console.log('data from backend')
+                    const oldMessages=JSON.parse(localStorage.getItem('messages'))
+                    const newMessages=fetchedData.data
+                    console.log(oldMessages)
+                    console.log(newMessages)
+                    const messages=[...oldMessages,...newMessages]
+                    console.log(messages)
+                    localStorage.setItem('messages',JSON.stringify(messages))
+                    dispatch(chatAction.addAllMessages(messages))
+                    
+                    
+                  }
+                  else if(!fetchedData.status){
+                      console.log('data from localstorage')
+                      const messages=JSON.parse(localStorage.getItem('messages'))
+                      if(Array.isArray(messages))
+                      {
+                        const data=messages.filter(msg=>msg.groupchat.id===props.groupDetails.id)
+                      console.log(data)
+                      dispatch(chatAction.addAllMessages(data))
+                      }
+                      else 
+                      dispatch(chatAction.addAllMessages([]))
+                      
+                  }
+                    
             }
-            else if(data && data.status)
+            if(type==='All_Groups')
             {
-                console.log('data from backend')
-               const oldMessages=JSON.parse(localStorage.getItem('messages'))
-               const newMessages=data.messages
-               console.log(oldMessages)
-               console.log(newMessages)
-               const messages=[...oldMessages,...newMessages]
-               console.log(messages)
-               localStorage.setItem('messages',JSON.stringify(messages))
-               dispatch(chatAction.addAllMessages(messages))
-               clearInterval(interval)
-               
+              console.log(fetchedData)
+              dispatch(chatAction.addAllGroups(fetchedData.data))
             }
-            else{
-                console.log('data from localstorage')
-                const messages=JSON.parse(localStorage.getItem('messages'))
-                dispatch(chatAction.addAllMessages(messages))
+            if(type==='INVITES')
+              {
+                console.log('invtes')
+                dispatch(chatAction.addAllInvites(fetchedData.data))
+              }
+              setState({data:fetchedData.data,error:null,loading:false,status:fetchedData.status})
             }
-               
+            
+           
             
 
         }
-        
-       const interval=setInterval(async()=>{
-          await getDatas()
-       },1000)
+      
+          getDatas()
+       
+    
 
     //   clearInterval(interval)
         
-    },[url])
+    },[url,props])
       
    
+    return state
     
 
 }

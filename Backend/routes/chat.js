@@ -7,7 +7,7 @@ const chatControler=require('../controler/chat')
 const authentication=require('../middleware/userAuthentication')
 
 
-route.post('/groupchat/send',chatControler.postMessages)
+route.post('/groupchat/send',authentication.userAuthentication,chatControler.postMessages)
 
 route.get('/groupchat/chats',authentication.userAuthentication,chatControler.getMessages)
 

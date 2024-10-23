@@ -1,0 +1,17 @@
+.side-bar{
+    
+    height: 100vh;
+   
+}
+.grouplist{
+    cursor: pointer;
+    font-weight: bold;
+    border: ridge;
+    text-align: center;
+    background: rgb(217, 238, 245);
+    list-style: none;
+}
+.grouplists{
+    margin-top: 20px;
+}
+

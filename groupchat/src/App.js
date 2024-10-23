@@ -20,37 +20,11 @@ function App() {
     
 },[])
 
-let lastId={id:null}
 
-  if(isLogin && localStorage.getItem('messages') && JSON.parse(localStorage.getItem('messages')).length)
-  {
-    const messages=JSON.parse(localStorage.getItem('messages'))
-    console.log(JSON.parse(localStorage.getItem('messages')).length)
-
-     lastId=messages[messages.length-1]
-      
-  }
-  else
-  {
-    console.log(isLogin  )
-    lastId={id:0}
-  }
-   
-
-  useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${parseInt(lastId.id)}`,lastId.id)
- 
- 
-  
-
-  
-//console.log(JSON.parse(localStorage.getItem('messages')).length)
  
   console.log(isLogin)
   return (
     <div className="App">
-      <header className="App-header">
-        
-      </header>
       <main className='main'>
         <Routes>
          <Route path='/' element={<Login/>}/>

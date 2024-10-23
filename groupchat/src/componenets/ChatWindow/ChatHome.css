@@ -4,3 +4,54 @@
     height:30rem;
     overflow-y: scroll;
 }
+
+.groupchat{
+    position: relative;
+    margin:0;
+}
+
+.dropdown{
+    position: absolute;
+    top: 0;
+    right: -25rem;
+}
+.invite-button{
+    position: absolute;
+    top: 5%;
+    right: 25%;
+}
+.invite-count{
+    position: absolute;
+    width:20px;
+    height:20px;
+    border-radius: 50%;
+   text-align: center;
+    background: rgb(144, 180, 187);
+}
+.invites{
+    position:absolute;
+    border: 2px ridge;
+    width:500px;
+    text-align: center;
+    height: 400px;
+    right:0;
+    top:50px;
+    background: rgb(187, 226, 129);
+    overflow-y: auto;
+    border-radius: 10px;
+    z-index: 2;
+    margin-bottom: 10px;
+    
+} 
+.invite-lists {
+    list-style: none;
+    border:2px ridge;
+    padding: 5px;
+    background: white;
+}
+.invite-lists p{
+    font-size: larger;
+    font-weight: bold;
+    
+
+}

@@ -1,7 +1,9 @@
 import {createSlice} from '@reduxjs/toolkit'
 
 const defaultValue={
-    messages:[]
+    messages:[],
+    groupnames:[],
+    invites:[]
 }
 
 const ChatSlice=createSlice({
@@ -20,6 +22,17 @@ const ChatSlice=createSlice({
             state.messages=[];
             state.messages=state.messages.concat(action.payload)
             console.log(state.messages)
+         },
+         addGroup(state,action){
+            state.groupnames=state.groupnames.concat(action.payload.groupName)
+         },
+         addAllGroups(state,action){
+            state.groupnames=[];
+            state.groupnames=state.groupnames.concat(action.payload)
+         },
+         addAllInvites(state,action)
+         {
+            state.invites=state.invites.concat(action.payload)
          }
     }
 })

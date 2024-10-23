@@ -16,7 +16,7 @@ const AuthenticationSlice=createSlice({
             
             localStorage.setItem('email',action.payload.email)
             localStorage.setItem('token',action.payload.token)
-            localStorage.setItem('messages',[])
+            localStorage.setItem('messages',JSON.stringify({message:null,id:0}))
              state.isLogin=true
             
           },

@@ -66,7 +66,7 @@ postSignInAuthentication=async(req,res,next)=>{
             
             if(response)
             {
-                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id),email:user[0].email})
+                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id),username:user[0].username,email:user[0].email})
              } 
              else if(!response)
                 return res.status(401).json({error:'Password MisMatch'}) 
@@ -110,8 +110,8 @@ const searchCredentials=(data)=>{
    })
 }
 
-const generateAccessToken=(userId)=>{
-    return jwt.sign({userId:userId},'wuCCWAcqs7yGQm82QhuXTJep6hRqMUdZQfqSFaVSZHwY3I5kHLpRqWRtFdRKDqJ')
+const generateAccessToken=(userId,username,email)=>{
+    return jwt.sign({userId:userId,username:username,email:email},'wuCCWAcqs7yGQm82QhuXTJep6hRqMUdZQfqSFaVSZHwY3I5kHLpRqWRtFdRKDqJ')
 }
 
 module.exports={postSignUpAuthentication,postSignInAuthentication}
