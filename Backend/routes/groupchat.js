@@ -16,6 +16,12 @@ route.post('/groupchat/invite/:groupid',authentication.userAuthentication,groupc
 
 route.get('/groupchat/invites',authentication.userAuthentication,groupchatControler.getInvitedDatas)
 
-route.get('/groupchat/getgroupdata',groupchatControler.getGroupDatas)
+route.get('/groupchat/groupdetails',groupchatControler.getGroupDetails)
+
+route.post('/groupchat/updateauthority',groupchatControler.postUpdateAuthority)
+
+route.post('/groupchat/addmember',groupchatControler.postAddMemberToGroup)
+
+route.post('/groupchat/exitgroup',authentication.userAuthentication,groupchatControler.exitFromGroup)
 
 module.exports=route

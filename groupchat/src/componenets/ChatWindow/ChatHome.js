@@ -6,29 +6,25 @@ import { chatAction } from "../../store/ChatSlice"
 import SideBar from "./sideBar"
 import DropDownMenu from "./DropDownMenu"
 import ChatSpace from "./ChatSpace"
+import { Link } from "react-router-dom"
+import useCheckMobileScreen from "./useCheckMobileScreen"
+
 const ChatHome=()=>{
 
-    
-      const [groupDetails,setGroupDetails]=useState(null)
-     
-    const handleChangeGroup=(groupData)=>{
-       setGroupDetails(groupData)
-    }
-
-
+    const isMobile=useCheckMobileScreen()
+ 
     return(
-        <Container className="groupchat">
-            <Row>
-             <Col className="col-2">
-              <SideBar changeGroup={handleChangeGroup}/>
-            </Col>
-             <Col>
-            <DropDownMenu/>
-           { groupDetails && <ChatSpace groupDetails={groupDetails}/>}
-              </Col>  
-            </Row>
+      <>
+      <SideBar isMobile={isMobile} isHide={false}/>
+      </>
+        
+            // <SideBar>
+            //   <Col className="home-col col-one "><DropDownMenu/></Col>
+            //   <Col  className="home-col col-4 shadow-lg"><Link to='/home' className="text-decoration-none text-dark">Chats</Link></Col>
+            //   <Col  className="home-col col-4 shadow-lg"><Link to='/contacts' className="text-decoration-none text-dark">Contacts</Link></Col>
+            // </SideBar>
            
-        </Container>
+        
     )
 }
 

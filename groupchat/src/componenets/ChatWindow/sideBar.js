@@ -1,30 +1,37 @@
 
 import {Container,Row,Col} from 'react-bootstrap'
 import './sideBar.css'
+import DropDownMenu from './DropDownMenu'
 import { useSelector } from 'react-redux'
-
+import { Link } from 'react-router-dom'
+import useFetch from '../../CustomHooks/useFetch'
 
 const SideBar=(props)=>{
 const groupnames=useSelector(state=>state.chat.groupnames)
-console.log(groupnames)
+console.log(props.isMobile+' '+props.isHide)
+useFetch('http://localhost:4000/groupchat/getgroups','All_Groups')
 
-const handleChangeGroup=(groupData)=>{
-   props.changeGroup(groupData)
-}
     return(
-        <Container className='bg-info side-bar' >
-           <Row>
+           <Row  >
+            <Col className={props.isMobile && props.isHide?'d-none':' side-bar col-lg-2 col-md-2 col-sm-12  '}>
               <ul className='grouplists'>
 
-                {groupnames.map(name=>
+                {groupnames.length>0 && groupnames.map(name=>
                 <>
-                <li key={name.id} className='grouplist' onClick={handleChangeGroup.bind(null,name)}>{name.groupname}</li>
+                {console.log(name.createdPhone)}
+                <Link key={name.id} className='grouplist'  to={`/home/${name.groupname}?id=${name.id}&created=${name.createdPhone}`} reloadDocument>{name.groupname}</Link>
                 </>
                 )}
                 
               </ul>
+              </Col>
+              <Col className={props.isMobile && !props.isHide?'d-none':'col-lg-10 col-md-10 col-sm-12'}>
+              
+                {props.children}
+             </Col>
+
+
            </Row>
-        </Container>
     )
 }
 export default SideBar

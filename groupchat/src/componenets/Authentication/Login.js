@@ -3,6 +3,7 @@ import {useState,useRef} from 'react'
 import { useDispatch } from 'react-redux'
 import { authAction } from '../../store/AuthenticationSlice'
 import { useNavigate } from 'react-router-dom'
+import './Login.css'
 
 const Login=()=>{
 
@@ -69,7 +70,7 @@ const Login=()=>{
             else 
             {
               alert(data.message)
-              dispatch(authAction.signIn({email:data.email,token:data.token}))
+              dispatch(authAction.signIn({email:data.email,token:data.token,phone:data.phone}))
               navigate('/home')
             }
          }
@@ -89,7 +90,7 @@ const Login=()=>{
  
 
     return(
-        <div>
+        <div className='login-form'>
     <Form className='text-center' onSubmit={handleSubmitForm}>
         
         <Form.Text className='fs-2 text-warning'>{isSignUp?'Register Here':'Login Here'}</Form.Text>

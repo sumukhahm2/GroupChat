@@ -22,6 +22,10 @@ const InviteLinks=sequelize.define('invitelinks',{
     invitephone:{
         type:Sequelize.STRING,
         allowNull:false,
+    },
+    invitegroup:{
+        type:Sequelize.STRING,
+        allowNull:false,
     }
 })
 

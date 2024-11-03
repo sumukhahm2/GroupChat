@@ -6,24 +6,30 @@ import './ChatHome.css'
 import { useDispatch,useSelector } from 'react-redux'
 import { chatAction } from '../../store/ChatSlice'
 import useFetch from '../../CustomHooks/useFetch'
+import SideBar from './sideBar'
+import { authAction } from '../../store/AuthenticationSlice'
+import { useNavigate } from 'react-router-dom'
+import ContactForm from './ContactForm'
 
 const DropDownMenu=()=>{
 
- useFetch('http://localhost:4000/groupchat/getgroups','All_Groups')
+ 
   useFetch('http://localhost:4000/groupchat/invites','INVITES')
 
     const [showForm,setForm]=useState(false)
+    const [showContactForm,setContactForm]=useState(false)
     const [inviteData,setInviteData]=useState([])
     const [isInvite,setInvite]=useState(false)
      const groupNameRef=useRef()
       const dispatch=useDispatch()
       const invites=useSelector(state=>state.chat.invites)
+      const navigate=useNavigate()
 
   console.log(invites)
     const handleCreateGroup=async(e)=>{
         e.preventDefault()
          const groupData={
-          groupName:groupNameRef.current.value
+          groupname:groupNameRef.current.value
          }
         try{
           const response=await fetch('http://localhost:4000/groupchat/creategroup',{
@@ -38,7 +44,12 @@ const DropDownMenu=()=>{
           const data=await response.json()
           console.log(data)
           if(data && data.message)
+          {
+            alert(`Congradulations ${groupData.groupname} created successfully`)
              dispatch(chatAction.addGroup({...groupData,id:data.groupId}))
+
+          }
+            
         }
         catch(error)
         {
@@ -62,11 +73,20 @@ const DropDownMenu=()=>{
 
         const resData=await response.json()
         console.log(resData)
+        if(resData && resData.message)
+          alert(resData.message)
     }
 
+    const logoutHandler=()=>{
+        alert('Are You Sure ? Want to Logout!')
+       dispatch(authAction.logout())
+       navigate('/')
+    }
+
+   
     console.log(inviteData)
     return(
-        <div>
+        <div >
             {showForm && <div className='border border-dark position-absolute top-50 end-50'><Form onSubmit={handleCreateGroup} className='p-2'>
                 <Form.Group>
                     <Form.Label>Enter Group Name</Form.Label>
@@ -74,25 +94,29 @@ const DropDownMenu=()=>{
                     <Button type='submit'>Submit</Button>
                 </Form.Group>
             </Form></div>}
+           
         <div className="dropdown">
         <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
-        Dropdown Button
+        More
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
         <Dropdown.Item onClick={()=>setForm(true)}>Create Group</Dropdown.Item>
+        <Dropdown.Item onClick={()=>{setContactForm(true)}}>New Contact</Dropdown.Item>
         <Dropdown.Item onClick={handleInvites}>Invites <span className='invite-count'>{invites.length>0?invites.length:0}</span></Dropdown.Item>
-        <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+        <Dropdown.Item  onClick={logoutHandler}>Logout</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
     </div>
+    {showContactForm && <ContactForm/>}
      {isInvite && <div className='invites'>
         <h3 className='bg-warning border rounded text-light'>Invited Links</h3>
         <ul>
         {inviteData.length>0?inviteData.map(data=>
           <li className='invite-lists'>
               <p className='bg-secondary border rounded text-light'>{data.invitephone}</p>
+              <p>{data.inviteuser} invited You to join the group  <br/><span className='text-secondary fs-3'>{data.invitegroup}</span></p>
               <p className='bg-success border rounded text-light'>Invited By:- {data.inviteuser}</p>
               <p className='bg-light border rounded text-light'>link :- <button className='btn-link border-0 bg-transparent text-primary ' onClick={handleJoinGroup.bind(null,data)}>{data.inviteurl}</button></p>
             </li>

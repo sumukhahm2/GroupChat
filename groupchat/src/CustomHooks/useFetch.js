@@ -1,14 +1,15 @@
 import {useState,useEffect,useCallback } from 'react'
 import { useDispatch,useSelector } from 'react-redux'
 import { chatAction } from '../store/ChatSlice'
+import { contactAction } from '../store/ContactSlice'
 
-const useFetch=(url,type,props)=>{
+const useFetch=(url,type,id)=>{
     
    const [state,setState]=useState({data:null,error:null,loading:true,status:false})
      const dispatch=useDispatch()
      const islogin=useSelector(state=>state.auth.isLogin)
 
-     console.log(url)
+     console.log('url= '+url)
     useEffect(()=>{
          
         async function getDatas(){
@@ -50,10 +51,15 @@ const useFetch=(url,type,props)=>{
                   else if(!fetchedData.status){
                       console.log('data from localstorage')
                       const messages=JSON.parse(localStorage.getItem('messages'))
+                      console.log(messages)
                       if(Array.isArray(messages))
                       {
-                        const data=messages.filter(msg=>msg.groupchat.id===props.groupDetails.id)
-                      console.log(data)
+                        const data=messages.filter(msg=>{
+                          console.log(id)
+                          return msg.groupchat.id==id
+                        }
+                        )
+                      
                       dispatch(chatAction.addAllMessages(data))
                       }
                       else 
@@ -69,10 +75,20 @@ const useFetch=(url,type,props)=>{
             }
             if(type==='INVITES')
               {
-                console.log('invtes')
+                console.log(fetchedData.data)
                 dispatch(chatAction.addAllInvites(fetchedData.data))
               }
               setState({data:fetchedData.data,error:null,loading:false,status:fetchedData.status})
+            }
+            if(type==='GROUP-DETAILS')
+            {
+              console.log(fetchedData.data)
+              dispatch(chatAction.addGroupDetails(fetchedData.data))
+            }
+            if(type==='GET-CONTACTS')
+            {
+              console.log(fetchedData.data)
+              dispatch(contactAction.getContacts(fetchedData.data))
             }
             
            
@@ -86,8 +102,8 @@ const useFetch=(url,type,props)=>{
 
     //   clearInterval(interval)
         
-    },[url,props])
-      
+    },[url])
+    console.log('in useeffect')
    
     return state
     

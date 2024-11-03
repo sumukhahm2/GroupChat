@@ -3,7 +3,7 @@ const Sequelize=require('sequelize')
 const bcrypt=require('bcrypt')
 const Auth=require('../models/auth')
 const jwt=require('jsonwebtoken') 
-
+const Contacts=require('../models/contacts')
 
 postSignUpAuthentication=async(req,res,next)=>{
     
@@ -12,7 +12,7 @@ postSignUpAuthentication=async(req,res,next)=>{
          email:req.body.email,
          phone:req.body.phone
        })
-      console.log(checkCredentials)
+     // console.log(checkCredentials)
        if(checkCredentials.status)
        {
         const signUpData={
@@ -21,9 +21,9 @@ postSignUpAuthentication=async(req,res,next)=>{
             password:req.body.password,
             phone:req.body.phone
         }
-        console.log(signUpData)
+        //console.log(signUpData)
         bcrypt.hash(signUpData.password,10,async(err,hash)=>{
-            console.log(err)
+            //console.log(err)
             const response=await Auth.create({...signUpData,password:hash})
 
             if(response.error)
@@ -31,7 +31,12 @@ postSignUpAuthentication=async(req,res,next)=>{
                 throw new Error(response.error)
             }
             else{
-                res.status(201).json({
+                 const contact=await Contacts.findOne({where:{phone:req.body.phone}})
+                   if(contact)
+                   {
+                     await Contacts.update({isMember:true},{where:{phone:req.body.phone}})
+                   }
+                  res.status(201).json({
                     message:'User Created Successfully!'
                 })
             }
@@ -42,7 +47,7 @@ postSignUpAuthentication=async(req,res,next)=>{
 
     }
     catch(error){
-        console.log(error.message)
+       // console.log(error.message)
         return res.status(500).json({error:error.message})
     } 
 }
@@ -64,9 +69,9 @@ postSignInAuthentication=async(req,res,next)=>{
                  
             }
             
-            if(response)
+            if(response) 
             {
-                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id),username:user[0].username,email:user[0].email})
+                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id,user[0].username,user[0].email,user[0].phone),username:user[0].username,email:user[0].email,phone:user[0].phone})
              } 
              else if(!response)
                 return res.status(401).json({error:'Password MisMatch'}) 
@@ -88,7 +93,7 @@ const searchCredentials=(data)=>{
    return new Promise(async(resolve,reject)=>{
     const email=data.email;
     const phone=data.phone
-    console.log(email)
+   // console.log(email)
       try{
           const user=await Auth.findOne({where:{email:email}})
           if(user)
@@ -110,8 +115,8 @@ const searchCredentials=(data)=>{
    })
 }
 
-const generateAccessToken=(userId,username,email)=>{
-    return jwt.sign({userId:userId,username:username,email:email},'wuCCWAcqs7yGQm82QhuXTJep6hRqMUdZQfqSFaVSZHwY3I5kHLpRqWRtFdRKDqJ')
+const generateAccessToken=(userId,username,email,phone)=>{
+    return jwt.sign({userId:userId,username:username,email:email,phone:phone},'wuCCWAcqs7yGQm82QhuXTJep6hRqMUdZQfqSFaVSZHwY3I5kHLpRqWRtFdRKDqJ')
 }
 
 module.exports={postSignUpAuthentication,postSignInAuthentication}

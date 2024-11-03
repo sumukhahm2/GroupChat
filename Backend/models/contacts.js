@@ -2,7 +2,7 @@ const Sequelize=require('sequelize')
 
 const sequelize=require('../database/db')
 
-const Chat=sequelize.define('chat',{
+const Contacts=sequelize.define('contacts',{
     
     
     id:{
@@ -11,24 +11,22 @@ const Chat=sequelize.define('chat',{
         allowNull:false,
         primaryKey:true
     },
-    message:{
+    username:{
         type:Sequelize.STRING,
         allowNull:false,  
-    },
-    sendername:{
-        type:Sequelize.STRING,
-        allowNull:false,  
-    },
-    groupname:{
-        type:Sequelize.STRING,
-        allowNull:false, 
     },
     phone:{
         type:Sequelize.STRING,
-        allowNull:false,
+        allowNull:false,  
+        unique:true
+    },
+    isMember:{
+        type:Sequelize.BOOLEAN,
+        allowNull:false,  
+        
     }
     
     
 })
 
-module.exports=Chat
+module.exports=Contacts

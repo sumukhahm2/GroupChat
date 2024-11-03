@@ -15,6 +15,10 @@ const GroupChat=sequelize.define('groupchat',{
         type:Sequelize.STRING,
         allowNull:false,  
     },
+    createdPhone:{
+        type:Sequelize.STRING,
+        allowNull:false, 
+    }
     
 })
 

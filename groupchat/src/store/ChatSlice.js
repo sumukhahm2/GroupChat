@@ -3,7 +3,9 @@ import {createSlice} from '@reduxjs/toolkit'
 const defaultValue={
     messages:[],
     groupnames:[],
-    invites:[]
+    invites:[],
+    groupdetails:[],
+    
 }
 
 const ChatSlice=createSlice({
@@ -12,7 +14,7 @@ const ChatSlice=createSlice({
     reducers:{
          addMessages(state,action)
          {
-            state.messages=state.messages.concat({message:action.payload.message,id:action.payload.id})
+            state.messages=state.messages.concat(action.payload)
             //state.messages=state.messages[0].concat(action.payload)
             console.log(state.messages)
             
@@ -24,7 +26,8 @@ const ChatSlice=createSlice({
             console.log(state.messages)
          },
          addGroup(state,action){
-            state.groupnames=state.groupnames.concat(action.payload.groupName)
+            console.log(action.payload)
+            state.groupnames=state.groupnames.concat(action.payload)
          },
          addAllGroups(state,action){
             state.groupnames=[];
@@ -33,6 +36,30 @@ const ChatSlice=createSlice({
          addAllInvites(state,action)
          {
             state.invites=state.invites.concat(action.payload)
+         },
+         addGroupDetails(state,action)
+         {
+
+            state.groupdetails=[]
+           state.groupdetails=state.groupdetails.concat(action.payload)
+           console.log(state.groupdetails)
+         },
+         updateGroupDetails(state,action){
+            const index=state.groupdetails.findIndex(item=>item.authId===action.payload.id)
+            console.log(index)
+            const user=state.groupdetails[index]
+            if(action.payload.type==='update-admin')
+           { 
+            const updatedGroup={...user,isAdmin:!user.isAdmin}
+            state.groupdetails[index]=updatedGroup
+            console.log(state.groupdetails)
+           }
+           if(action.payload.type==='update-member')
+           {
+            const updatedGroup={...user,isMember:false}
+            state.groupdetails[index]=updatedGroup
+            console.log(state.groupdetails)
+           }
          }
     }
 })

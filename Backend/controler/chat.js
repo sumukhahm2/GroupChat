@@ -2,6 +2,7 @@ const { Op, Model } = require('sequelize')
 const Chat=require('../models/chat')
 const jwt=require('jsonwebtoken')
 const GroupChat = require('../models/groupchat')
+const Auth=require('../models/auth')
 postMessages=async(req,res,next)=>{
      //console.log(req.body)
    
@@ -11,17 +12,18 @@ postMessages=async(req,res,next)=>{
         const chatData={
             message:req.body.message,
             sendername:req.user.username,
+            phone:req.user.phone,
             groupname:req.body.groupname,
             authId:req.user.id,
             groupchatId:req.body.groupId,
           
         }
        const response=await Chat.create({...chatData})
-       console.log(response)
+       //console.log(response)
     
        
        if(response){
-        res.status(201).json({message:response.dataValues})
+        res.status(201).json({message:{...response.dataValues,phone:req.user.phone}})
        }
        else 
          throw new Error("Something went Wrong")
@@ -37,16 +39,16 @@ getAllMessages=async(req,res,next)=>
     try{
        const messageId=parseInt(req.query.lastmessageid)
        const groupchatId=req.query.groupchatid
-       console.log(messageId)
+       console.log('MsgId'+messageId)
        if(messageId>=0)
        {
-        //console.log('how'+messageId)
+        console.log('how'+messageId)
         
          const messages=await Chat.findAll({where:{id:{[Op.gt]:messageId},groupchatId:groupchatId},
           include:[{model:GroupChat,attributes:['id','groupname']}]
         })
          
-         console.log(messages)
+         console.log('All Messages'+messages)
          let msgId
         if(messages.length>0)
           msgId=messages[messages.length-1].id
@@ -67,7 +69,7 @@ getAllMessages=async(req,res,next)=>
        }
     }
     catch(error){
-
+        console.log(error)
     }
 }
 

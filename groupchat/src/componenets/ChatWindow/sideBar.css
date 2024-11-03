@@ -1,17 +1,72 @@
 .side-bar{
     
     height: 100vh;
+    background: #98FB98;
+    width: 50px;
+
    
 }
 .grouplist{
     cursor: pointer;
+    font-size: larger;
+    display: block;
     font-weight: bold;
-    border: ridge;
     text-align: center;
-    background: rgb(217, 238, 245);
-    list-style: none;
+    background: #03a353;
+    text-decoration: none;
+    color: rgb(255, 254, 254);
+    padding: 5px;
+    border: #98FB98 5px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width:150px;
+}
+
+.grouplist:hover{
+    background: #0bdb0b;
+    color: black;
 }
 .grouplists{
     margin-top: 20px;
 }
 
+
+@media only screen and (max-width:768px)  { 
+    .grouplist{
+        cursor: pointer;
+        font-size: larger;
+        display: block;
+        font-weight: bold;
+        text-align: center;
+        background: #03a353;
+        text-decoration: none;
+        color: rgb(255, 254, 254);
+        padding: 5px;
+        border: #98FB98 5px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       width:250px;
+    }
+    .grouplists{
+        margin-top: 20px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+ }
+ @media screen and (min-width:426px) and (max-width:768px){ 
+    
+}
+@media (min-width:600px)  { /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */ }
+@media (min-width:801px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */ }
+@media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }
+@media (min-width:1281px) { /* hi-res laptops and desktops */ }
