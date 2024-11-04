@@ -114,7 +114,7 @@ sendInviteLink=async(req,res,next)=>{
 
           console.log(userData)
           const userDetails={
-            inviteurl:`http://localhost:4000/groupchat/joingroup/${groupId}`,
+            inviteurl:`http://16.171.19.58:3000/groupchat/joingroup/${groupId}`,
             inviteuser:req.user.username,
             invitephone:req.user.phone,
             authId:userData.id,

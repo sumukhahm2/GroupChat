@@ -66,6 +66,17 @@ Auth.belongsToMany(GroupChat,{ through: AuthGroupChat })
 
  Auth.hasMany(InviteLinks)
  InviteLinks.belongsTo(Auth)
+
+ const _dirname=path.dirname("")
+const buildPath=path.join(_dirname,"../groupchat/build")
+
+app.use(express.static(buildPath))
+
+app.use((req,res)=>{
+    res.sendFile(
+        path.join(__dirname,"../groupchat/build/index.html")
+    )
+})
    
 app.use(helmet()) 
 app.use(morgan('tiny'))
@@ -73,8 +84,8 @@ app.use(morgan('tiny'))
 
 sequelize.sync()  
 .then(result=>{
-    app.listen(4000,()=>{
-        console.log('listening port 4000')
+    app.listen(3000,()=>{
+        console.log('listening port 3000')
     })
 })
 .catch(error=>{

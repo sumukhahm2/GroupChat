@@ -9,7 +9,7 @@ import useFetch from '../../CustomHooks/useFetch'
 const SideBar=(props)=>{
 const groupnames=useSelector(state=>state.chat.groupnames)
 console.log(props.isMobile+' '+props.isHide)
-useFetch('http://localhost:4000/groupchat/getgroups','All_Groups')
+useFetch('http://16.171.19.58:3000/groupchat/getgroups','All_Groups')
 
     return(
            <Row  >

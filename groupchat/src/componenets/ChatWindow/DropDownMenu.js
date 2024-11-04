@@ -14,7 +14,7 @@ import ContactForm from './ContactForm'
 const DropDownMenu=()=>{
 
  
-  useFetch('http://localhost:4000/groupchat/invites','INVITES')
+  useFetch('http://16.171.19.58:3000/groupchat/invites','INVITES')
 
     const [showForm,setForm]=useState(false)
     const [showContactForm,setContactForm]=useState(false)
@@ -32,7 +32,7 @@ const DropDownMenu=()=>{
           groupname:groupNameRef.current.value
          }
         try{
-          const response=await fetch('http://localhost:4000/groupchat/creategroup',{
+          const response=await fetch('http://16.171.19.58:3000/groupchat/creategroup',{
             method:'POST',
             body:JSON.stringify(groupData),
             headers:{

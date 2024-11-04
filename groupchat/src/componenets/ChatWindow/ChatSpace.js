@@ -37,8 +37,8 @@ const ChatSpace=()=>{
     
      
  
- useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
- useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
+ useFetch(`http://16.171.19.58:3000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
+ useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
  const isMobile=useCheckMobileScreen()
   console.log(isMobile)
     const messages=useSelector(state=>state.chat.messages)
@@ -62,7 +62,7 @@ const ChatSpace=()=>{
          groupname:param.groupname
         }
         try{
-             const response=await fetch('http://localhost:4000/groupchat/send',{
+             const response=await fetch('http://16.171.19.58:3000/groupchat/send',{
                  method:'POST',
                  body:JSON.stringify(chatData),
                  headers:{
@@ -95,7 +95,7 @@ const ChatSpace=()=>{
       }
       try{
         console.log(searchParams.get('id'))
-         const response=await fetch(`http://localhost:4000/groupchat/invite/${searchParams.get('id')}`,
+         const response=await fetch(`http://16.171.19.58:3000/groupchat/invite/${searchParams.get('id')}`,
             {
                 method:'POST',
                 body:JSON.stringify(inviteData),
