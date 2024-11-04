@@ -84,9 +84,10 @@ app.use(morgan('tiny'))
 
 sequelize.sync()  
 .then(result=>{
-    app.listen(3000,()=>{
-        console.log('listening port 3000')
-    })
+    const port=process.env.PORT||3000
+    app.listen(port, () => {
+        console.log(`Sample app listening at http://51.20.129.197:${port}`)
+     })
 })
 .catch(error=>{
     console.log(error) 
