@@ -2,8 +2,10 @@ const { Op, Model } = require('sequelize')
 const Chat=require('../models/chat')
 const jwt=require('jsonwebtoken')
 const GroupChat = require('../models/groupchat')
-const Auth=require('../models/auth')
-postMessages=async(req,res,next)=>{
+
+
+
+postMessages=async(req,res,io=null)=>{
      //console.log(req.body)
    
     try{
@@ -21,7 +23,9 @@ postMessages=async(req,res,next)=>{
        const response=await Chat.create({...chatData})
        //console.log(response)
     
-       
+       if(io){
+        io.emit('new-message',{...response.dataValues,phone:req.user.phone})
+       }
        if(response){
         res.status(201).json({message:{...response.dataValues,phone:req.user.phone}})
        }
@@ -33,6 +37,7 @@ postMessages=async(req,res,next)=>{
     }
 
 }
+
 
 getAllMessages=async(req,res,next)=>
 {

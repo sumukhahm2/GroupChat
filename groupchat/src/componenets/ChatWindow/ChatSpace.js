@@ -7,7 +7,7 @@ import useFetch from "../../CustomHooks/useFetch"
 import { Link, useParams,useSearchParams,useNavigate} from 'react-router-dom'
 import SideBar from './sideBar'
 import useCheckMobileScreen from './useCheckMobileScreen'
-
+import socket from '../../store/store'
 const ChatSpace=()=>{
 
     const chatRef=useRef()
@@ -19,7 +19,7 @@ const ChatSpace=()=>{
     const param=useParams()
     const navigate=useNavigate()
     
-
+   
     
     let id=0;
       console.log(param.groupname)
@@ -37,8 +37,8 @@ const ChatSpace=()=>{
     
      
  
- useFetch(`http://16.171.19.58:3000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
- useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
+ useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
+ useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
  const isMobile=useCheckMobileScreen()
   console.log(isMobile)
     const messages=useSelector(state=>state.chat.messages)
@@ -62,7 +62,7 @@ const ChatSpace=()=>{
          groupname:param.groupname
         }
         try{
-             const response=await fetch('http://16.171.19.58:3000/groupchat/send',{
+             const response=await fetch('http://localhost:4000/groupchat/send',{
                  method:'POST',
                  body:JSON.stringify(chatData),
                  headers:{
@@ -78,6 +78,7 @@ const ChatSpace=()=>{
              if(data)
              {
                dispatch(chatAction.addMessages(data.message))
+               socket.emit('send-message',data.message)
              }
              
         }
@@ -95,7 +96,7 @@ const ChatSpace=()=>{
       }
       try{
         console.log(searchParams.get('id'))
-         const response=await fetch(`http://16.171.19.58:3000/groupchat/invite/${searchParams.get('id')}`,
+         const response=await fetch(`http://localhost:4000/groupchat/invite/${searchParams.get('id')}`,
             {
                 method:'POST',
                 body:JSON.stringify(inviteData),

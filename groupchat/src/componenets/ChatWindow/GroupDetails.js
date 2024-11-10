@@ -15,7 +15,7 @@ const GroupDetails=()=>{
     const navigate=useNavigate()
     const dispatch=useDispatch()
 
-      useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
+      //useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
     const groupDetails=useSelector(state=>state.chat.groupdetails)
     console.log(groupDetails)
      let currentUser=[]
@@ -31,7 +31,7 @@ const GroupDetails=()=>{
             authid:datas.id,
             isAdmin:datas.isAdmin
         }
-        const response=await fetch(`http://16.171.19.58:3000/groupchat/updateauthority`,
+        const response=await fetch(`http://localhost:4000/groupchat/updateauthority`,
             {
                 method:'POST',
                 body:JSON.stringify(updatingData),
@@ -58,7 +58,7 @@ const GroupDetails=()=>{
       let response
       if(authId===currentUser[0].authId)
       {
-       response=await fetch('http://16.171.19.58:3000/groupchat/exitgroup',{
+       response=await fetch('http://localhost:4000/groupchat/exitgroup',{
         method:'POST',
         body:JSON.stringify(exitData),
         headers:{
@@ -68,7 +68,7 @@ const GroupDetails=()=>{
       })
     }
     else{
-        response=await fetch('http://16.171.19.58:3000/groupchat/exitgroup',{
+        response=await fetch('http://localhost:4000/groupchat/exitgroup',{
             method:'POST',
             body:JSON.stringify(exitData),
             headers:{

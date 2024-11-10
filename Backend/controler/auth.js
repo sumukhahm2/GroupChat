@@ -57,10 +57,16 @@ postSignInAuthentication=async(req,res,next)=>{
         email:req.body.email,
         password:req.body.password
       }
+      console.log(signInData)
+      
      try{
-        const user=await Auth.findAll({where:{email:signInData.email}})
-   
-       if(user.length!==0)
+      let user
+      if(signInData.email!==undefined)
+        {
+         user=await Auth.findAll({where:{email:signInData.email}})
+        }
+         console.log('hello')
+       if(user && user.length!==0)
        {
          bcrypt.compare(signInData.password,user[0].password,(err,response)=>{
             if(err)

@@ -20,38 +20,38 @@ const useFetch=(url,type,id)=>{
               }
             })
             const fetchedData=await response.json()
-            console.log(fetchedData)
+             console.log(fetchedData)
           if(fetchedData)
           {
             
             if(type==='ALL_CHATS')
             {
-              console.log(fetchedData.id)
+              // console.log(fetchedData.id)
               if(fetchedData.id===0 && fetchedData.data)
                   {
-                      console.log('data first time')
+                      // console.log('data first time')
                       
                       localStorage.setItem('messages',JSON.stringify(fetchedData.data))
                       dispatch(chatAction.addAllMessages(fetchedData.data))
                   }
                   else if(fetchedData.status )
                   {
-                      console.log('data from backend')
+                      // console.log('data from backend')
                     const oldMessages=JSON.parse(localStorage.getItem('messages'))
                     const newMessages=fetchedData.data
-                    console.log(oldMessages)
-                    console.log(newMessages)
+                    // console.log(oldMessages)
+                    // console.log(newMessages)
                     const messages=[...oldMessages,...newMessages]
-                    console.log(messages)
+                    //console.log(messages)
                     localStorage.setItem('messages',JSON.stringify(messages))
                     dispatch(chatAction.addAllMessages(messages))
                     
                     
                   }
                   else if(!fetchedData.status){
-                      console.log('data from localstorage')
+                      //console.log('data from localstorage')
                       const messages=JSON.parse(localStorage.getItem('messages'))
-                      console.log(messages)
+                      //console.log(messages)
                       if(Array.isArray(messages))
                       {
                         const data=messages.filter(msg=>{
@@ -75,19 +75,19 @@ const useFetch=(url,type,id)=>{
             }
             if(type==='INVITES')
               {
-                console.log(fetchedData.data)
+                //console.log(fetchedData.data)
                 dispatch(chatAction.addAllInvites(fetchedData.data))
               }
               setState({data:fetchedData.data,error:null,loading:false,status:fetchedData.status})
             }
             if(type==='GROUP-DETAILS')
             {
-              console.log(fetchedData.data)
+              //console.log(fetchedData.data)
               dispatch(chatAction.addGroupDetails(fetchedData.data))
             }
             if(type==='GET-CONTACTS')
             {
-              console.log(fetchedData.data)
+              //console.log(fetchedData.data)
               dispatch(contactAction.getContacts(fetchedData.data))
             }
             
@@ -96,6 +96,7 @@ const useFetch=(url,type,id)=>{
 
         }
       
+        if(islogin)
           getDatas()
        
     

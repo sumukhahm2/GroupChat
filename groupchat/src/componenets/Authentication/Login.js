@@ -33,7 +33,7 @@ const Login=()=>{
         password:passwordRef.current.value,
         phone:phoneRef.current.value
       }
-       response=await fetch('http://16.171.19.58:3000/groupchat/signup',
+       response=await fetch('http://localhost:4000/groupchat/signup',
         {
           method:'POST',
           body:JSON.stringify(signUpData),
@@ -48,8 +48,8 @@ const Login=()=>{
           email:emailRef.current.value,
           password:passwordRef.current.value
         }
-
-        response=await fetch('http://16.171.19.58:3000/groupchat/signin',{
+       console.log(signInData)
+        response=await fetch('http://localhost:4000/groupchat/signin',{
           method:'POST',
           body:JSON.stringify(signInData),
           headers:{

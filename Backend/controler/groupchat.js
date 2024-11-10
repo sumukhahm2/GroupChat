@@ -34,7 +34,7 @@ postCreateGroup=async(req,res,next)=>{
         
         if(groupchat)
         {
-            res.status(201).json({message:'Group Created SuccessFully',groupId:groupchat.dataValues.id})
+           return res.status(201).json({message:'Group Created SuccessFully',groupId:groupchat.dataValues.id})
         }
     }
     catch(error)
@@ -50,14 +50,18 @@ getGroupNames=async (req,res,next)=>{
        
        //console.log('groups'+groupNames)
        if(groupNames)
-         return res.status(201).json({data:groupNames})
-        else  
-          return res.status(404).json({error:'No Groups Found'})
+       {
+        console.log('Group Names:- '+"Sending success response");
+        return res.status(201).json({data:groupNames})
+       }
+       else {
+        console.log("No groups found, sending 404 response");
+        return res.status(404).json({ error: 'No Groups Found' });
     }
-    catch(error)
-    {
-       return  res.status(500).json({error:error.message})
-    }
+} catch (error) {
+    console.log("Error occurred:", error.message);
+    return res.status(500).json({ error: error.message });
+}
 }
 
 
@@ -69,11 +73,11 @@ postJoinGroup=async(req,res,next)=>{
         
        )
        await req.user.addGroupchat(groupchat,{through:{isAdmin:false,isMember:true}})
-       res.status(201).json({message:`Successfully Joined to Group ${groupchat.groupname}`})
+       return res.status(201).json({message:`Successfully Joined to Group ${groupchat.groupname}`})
 
     }
     catch(error){
-      res.status(500).json({error:error})
+      return res.status(500).json({error:error})
     }
 }
 
@@ -89,11 +93,11 @@ postAddMemberToGroup=async(req,res,next)=>{
           const group=await GroupChat.findOne({where:{id:groupId}})
 
              await user[0].addGroupchat(group,{through:{isAdmin:false,isMember:true}})
-             res.status(201).json({message:'Member Added Successfully'})
+            return  res.status(201).json({message:'Member Added Successfully'})
 
        }
        else
-         res.status(404).json({error:'Usser Not Registered in GroupChat App'})
+         return res.status(404).json({error:'Usser Not Registered in GroupChat App'})
 
     }
     catch(error)
@@ -114,7 +118,7 @@ sendInviteLink=async(req,res,next)=>{
 
           console.log(userData)
           const userDetails={
-            inviteurl:`http://16.171.19.58:3000/groupchat/joingroup/${groupId}`,
+            inviteurl:`http://localhost:4000/groupchat/joingroup/${groupId}`,
             inviteuser:req.user.username,
             invitephone:req.user.phone,
             authId:userData.id,
@@ -134,20 +138,24 @@ sendInviteLink=async(req,res,next)=>{
     
 }
 
-getInvitedDatas=async(req,res,next)=>{
+getInvitedDatas = async (req, res, next) => {
+    try {
+        const invites = await InviteLinks.findAll({ where: { authId: req.user.id } });
 
-    try{
-       const invites=await InviteLinks.findAll({where:{authId:req.user.id}})
-       //console.log('invites'+invites)
-       if(invites){
-        res.status(201).json({data:invites})
-       }
+        if (invites && invites.length > 0) {
+            // If invites are found, send them back as a response
+            return res.status(200).json({ data: invites });
+        } else {
+            // If no invites are found, send a 404 response
+            return res.status(201).json({ message: 'No invites found' });
+        }
+    } catch (error) {
+        // Handle any errors by sending a 500 response
+        console.error("Error in getInvitedDatas:", error);
+        return res.status(500).json({ error: error.message });
     }
-    catch(error)
-    {
-        res.status(500).json({error:error.message})
-    }
-}
+};
+
 
 getGroupDetails=async(req,res,next)=>{
    const groupid=req.query.groupid
@@ -166,13 +174,13 @@ getGroupDetails=async(req,res,next)=>{
         }
       
         if(groupDetails)
-        res.status(201).json({data:usernames})
+       return  res.status(201).json({data:usernames})
         else
-        res.status(404).json({error:'Something went Wrong'})
+       return  res.status(404).json({error:'Something went Wrong'})
     }
     catch(error)
     {
-      res.status(500).json({error:error.message})
+      return res.status(500).json({error:error.message})
     }
    
 }
@@ -189,11 +197,11 @@ postUpdateAuthority=async(req,res,next)=>{
        
        if(authgroupchat)
        {
-        res.status(201).json({data:authgroupchat})
+       return  res.status(201).json({data:authgroupchat})
        }
     }
     catch(error){
-       res.status(500).json({error:error.message})
+      return  res.status(500).json({error:error.message})
     }
 }
 
@@ -222,7 +230,7 @@ exitFromGroup=async (req,res,next)=>{
             
         
 
-        res.status(201).json({message:'Successfully exited from Group'})
+       return res.status(201).json({message:'Successfully exited from Group'})
 
     }
     catch(error)
