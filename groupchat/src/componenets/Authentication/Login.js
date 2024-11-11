@@ -50,7 +50,7 @@ const Login=()=>{
 
     // API call
     response = await fetch(
-      `http://51.20.129.197:3000/groupchat/${isSignUp ? 'signup' : 'signin'}`,
+      `http://16.171.19.58:3000/groupchat/${isSignUp ? 'signup' : 'signin'}`,
       {
         method: 'POST',
         body: JSON.stringify(formData),

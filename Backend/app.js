@@ -51,7 +51,7 @@ const server = http.createServer(app);
 
 const io = socketIo(server,{
     cors: {
-      origin: "http://51.20.129.197:3000",
+      origin: "http://16.171.19.58:3000",
       methods: ["GET", "POST"]
     }
   });
@@ -105,7 +105,7 @@ sequelize.sync()
 
     
     server.listen(port, () => {
-        console.log(`Sample app listening at http://51.20.129.197:${port}`)
+        console.log(`Sample app listening at http://16.171.19.58:${port}`)
      })
 })
 .catch(error=>{
