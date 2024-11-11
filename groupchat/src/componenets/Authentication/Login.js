@@ -21,71 +21,81 @@ const Login=()=>{
   const [message,setMessage]=useState(null)
  const [isSignUp,setState]=useState(true)
 
-  const handleSubmitForm=async(event)=>{
-      event.preventDefault()
-  try{
-      let response
-     if(isSignUp) 
-     {
-      const signUpData={
-        name:nameRef.current.value,
-        email:emailRef.current.value,
-        password:passwordRef.current.value,
-        phone:phoneRef.current.value
-      }
-       response=await fetch('http://localhost:4000/groupchat/signup',
-        {
-          method:'POST',
-          body:JSON.stringify(signUpData),
-          headers:{
-            'Content-Type':'application/json'
-          }
-        }
-      )
-     }
-     else{
-        const signInData={
-          email:emailRef.current.value,
-          password:passwordRef.current.value
-        }
-       console.log(signInData)
-        response=await fetch('http://localhost:4000/groupchat/signin',{
-          method:'POST',
-          body:JSON.stringify(signInData),
-          headers:{
-            'Content-Type':'application/json'
-          }
-        })
-     }
-      const data=await response.json()
-       console.log(data)
-         if(data && data.error)
-         {
-          throw new Error(data.error)
-         }
-         else if(data && data.message)
-         {
-            if(isSignUp)
-            setMessage(data.message)
-            else 
-            {
-              alert(data.message)
-              dispatch(authAction.signIn({email:data.email,token:data.token,phone:data.phone}))
-              navigate('/home')
-            }
-         }
-          else 
-            throw new Error('Something Went Wrong')
-        
-      }
-      catch(error){
-        setError(error.message)
-      }
-      setTimeout(()=>{
-        setError(null)
-      },5000)
+ const handleSubmitForm = async (event) => {
+  event.preventDefault();
 
+  try {
+    let response;
+
+    // Gather data based on the form type (sign up or sign in)
+    const formData = isSignUp
+      ? {
+          name: nameRef.current.value,
+          email: emailRef.current.value,
+          password: passwordRef.current.value,
+          phone: phoneRef.current.value,
+        }
+      : {
+          email: emailRef.current.value,
+          password: passwordRef.current.value,
+        };
+
+    // Basic validation (e.g., email and password are required)
+    if (!formData.email || !formData.password) {
+      throw new Error("Email and password are required");
+    }
+    if (isSignUp && (!formData.name || !formData.phone)) {
+      throw new Error("Name and phone are required for registration");
+    }
+
+    // API call
+    response = await fetch(
+      `http://51.20.129.197:3000/groupchat/${isSignUp ? 'signup' : 'signin'}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Check HTTP response status
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (data.message) {
+      if (isSignUp) {
+        setMessage({ type: 'success', text: data.message });
+      } else {
+        alert(data.message);
+        dispatch(authAction.signIn({
+          email: data.email,
+          token: data.token,
+          phone: data.phone,
+        }));
+        navigate('/home');
+      }
+    } else {
+      throw new Error("Something went wrong. Please try again.");
+    }
+
+  } catch (error) {
+    setError({ type: 'error', text: error.message });
+  } finally {
+    // setTimeout(() => {
+    //   setError(null);
+    //   setMessage(null);
+    // }, 5000);
   }
+};
 
  
 

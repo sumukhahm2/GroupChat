@@ -17,7 +17,7 @@ const ContactForm=()=>{
         phone:phoneRef.current.value
       }
        try{
-           const response=await  fetch('http://localhost:4000/groupchat/addcontact',{
+           const response=await  fetch('http://51.20.129.197:3000/groupchat/addcontact',{
             method:'POST',
             body:JSON.stringify(contactData),
             headers:{

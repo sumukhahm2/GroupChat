@@ -29,7 +29,7 @@ const Auth=sequelize.define('auth',{
         
 },
 phone:{
-    type:Sequelize.STRING,
+    type:Sequelize.STRING, 
     allowNull:false,
     unique:true
 }

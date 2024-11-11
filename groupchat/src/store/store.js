@@ -11,16 +11,3 @@ const store=configureStore({
 export default store
 
 
-export const socket = io('http://localhost:4000');
-
-
-socket.on('connect', () => {
-  console.log('Connected to socket server with ID:', socket.id);
-});
-
-
-
-
-socket.on('disconnect', () => {
-    console.log('Disconnected from socket server');
-  });

@@ -21,7 +21,7 @@ const Contacts=(props)=>{
    const [form,setForm]=useState(false)
      const navigate=useNavigate()
   console.log(contacts)
-    useFetch('http://localhost:4000/groupchat/getcontacts','GET-CONTACTS')
+    useFetch('http://51.20.129.197:3000/groupchat/getcontacts','GET-CONTACTS')
     const items=['message','Send Invite','Add to Group']
 
     const selectedItem=async(item)=>{
@@ -33,7 +33,7 @@ const Contacts=(props)=>{
                 phone:item.contact,
                 groupId:props.groupId
             }
-           const response=await fetch('http://localhost:4000/groupchat/addmember',
+           const response=await fetch('http://51.20.129.197:3000/groupchat/addmember',
             {
                 method:'POST',
                 body:JSON.stringify(memberData),

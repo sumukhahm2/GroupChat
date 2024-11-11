@@ -5,11 +5,11 @@ const GroupChat = require('../models/groupchat')
 
 
 
-postMessages=async(req,res,io=null)=>{
-     //console.log(req.body)
+postMessages=async(req,res)=>{
+     console.log(req.body)
    
     try{
-        
+         
         //console.log(data)
         const chatData={
             message:req.body.message,
@@ -21,11 +21,9 @@ postMessages=async(req,res,io=null)=>{
           
         }
        const response=await Chat.create({...chatData})
-       //console.log(response)
+       console.log(response)
     
-       if(io){
-        io.emit('new-message',{...response.dataValues,phone:req.user.phone})
-       }
+      
        if(response){
         res.status(201).json({message:{...response.dataValues,phone:req.user.phone}})
        }

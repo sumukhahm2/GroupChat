@@ -48,10 +48,10 @@ const socketIo = require('socket.io');
 const socketEvents=require('./sockets/socket')
 
 const server = http.createServer(app);
-server.on('request', app);
+
 const io = socketIo(server,{
     cors: {
-      origin: "http://localhost:3000",
+      origin: "http://51.20.129.197:3000",
       methods: ["GET", "POST"]
     }
   });
@@ -83,16 +83,16 @@ Auth.belongsToMany(GroupChat,{ through: AuthGroupChat })
  Auth.hasMany(InviteLinks)
  InviteLinks.belongsTo(Auth)
 
-//  const _dirname=path.dirname("")
-// const buildPath=path.join(_dirname,"../groupchat/build")
+ const _dirname=path.dirname("")
+const buildPath=path.join(_dirname,"../groupchat/build")
 
-// app.use(express.static(buildPath))
+app.use(express.static(buildPath))
 
-// app.use((req,res)=>{
-//     res.sendFile(
-//         path.join(__dirname,"../groupchat/build/index.html")
-//     )
-// })
+app.use((req,res)=>{
+    res.sendFile(
+        path.join(__dirname,"../groupchat/build/index.html")
+    )
+})
    
 app.use(helmet()) 
 app.use(morgan('tiny'))
@@ -101,7 +101,9 @@ app.use(morgan('tiny'))
 sequelize.sync()  
 .then(result=>{
     
-    const port=process.env.PORT||4000
+    const port=process.env.PORT||3000
+
+    
     server.listen(port, () => {
         console.log(`Sample app listening at http://51.20.129.197:${port}`)
      })

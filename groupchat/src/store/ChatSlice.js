@@ -14,11 +14,13 @@ const ChatSlice=createSlice({
     reducers:{
          addMessages(state,action)
          {
+            console.log(state.messages)
             state.messages=state.messages.concat(action.payload)
             //state.messages=state.messages[0].concat(action.payload)
             console.log(state.messages)
             
          },
+         
          addAllMessages(state,action){
             //console.log(action.payload)
             state.messages=[];

@@ -21,7 +21,7 @@ const AddGroupForm=(prop)=>{
           phone:localStorage.getItem('phone')
          }
         try{
-          const response=await fetch('http://localhost:4000/groupchat/creategroup',{
+          const response=await fetch('http://51.20.129.197:3000/groupchat/creategroup',{
             method:'POST',
             body:JSON.stringify(groupData),
             headers:{

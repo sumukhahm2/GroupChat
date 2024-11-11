@@ -7,7 +7,7 @@ import useFetch from "../../CustomHooks/useFetch"
 import { Link, useParams,useSearchParams,useNavigate} from 'react-router-dom'
 import SideBar from './sideBar'
 import useCheckMobileScreen from './useCheckMobileScreen'
-import socket from '../../store/store'
+import socket from '../../Socket/Socket'
 const ChatSpace=()=>{
 
     const chatRef=useRef()
@@ -20,7 +20,8 @@ const ChatSpace=()=>{
     const navigate=useNavigate()
     
    
-    
+      
+
     let id=0;
       console.log(param.groupname)
       console.log(searchParams.get('created'))
@@ -34,11 +35,22 @@ const ChatSpace=()=>{
     id=msgData[msgLength-1].id
     console.log(id)
  }
-    
-     
+ useEffect(() => {
+ socket.emit('join', searchParams.get('id'));
+
+  socket.on('receive-message', (incomingMessage) => {
+    console.log('receive '+incomingMessage)
+    dispatch(chatAction.addMessages(incomingMessage.message));
+  });
+
+  // Cleanup listener on component unmount
+ return () => {
+      socket.off('receive-message');
+    };
+  }, [searchParams.get('id')]);
  
- useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
- useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
+ useFetch(`http://51.20.129.197:3000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
+ useFetch(`http://51.20.129.197:3000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
  const isMobile=useCheckMobileScreen()
   console.log(isMobile)
     const messages=useSelector(state=>state.chat.messages)
@@ -62,7 +74,7 @@ const ChatSpace=()=>{
          groupname:param.groupname
         }
         try{
-             const response=await fetch('http://localhost:4000/groupchat/send',{
+             const response=await fetch('http://51.20.129.197:3000/groupchat/send',{
                  method:'POST',
                  body:JSON.stringify(chatData),
                  headers:{
@@ -78,7 +90,14 @@ const ChatSpace=()=>{
              if(data)
              {
                dispatch(chatAction.addMessages(data.message))
-               socket.emit('send-message',data.message)
+               const sendMessage={
+                groupChatId:searchParams.get('id'),
+                message:data.message
+               }
+               if(socket.connected)
+               socket.emit('send-message',sendMessage)
+              else  
+                console.log('socket not connected')
              }
              
         }
@@ -88,6 +107,11 @@ const ChatSpace=()=>{
         
      }
 
+    //  socket.on('send-message', (newMessage) => {
+    //   console.log('New message received:', newMessage);
+    //   dispatch(chatAction.addMessages(newMessage)); // Add to local state
+    // });
+
     const handleInviteLink=async(event)=>{
       event.preventDefault()
       const inviteData={
@@ -96,7 +120,7 @@ const ChatSpace=()=>{
       }
       try{
         console.log(searchParams.get('id'))
-         const response=await fetch(`http://localhost:4000/groupchat/invite/${searchParams.get('id')}`,
+         const response=await fetch(`http://51.20.129.197:3000/groupchat/invite/${searchParams.get('id')}`,
             {
                 method:'POST',
                 body:JSON.stringify(inviteData),

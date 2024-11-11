@@ -52,48 +52,51 @@ postSignUpAuthentication=async(req,res,next)=>{
     } 
 }
 
-postSignInAuthentication=async(req,res,next)=>{
-      const signInData={
-        email:req.body.email,
-        password:req.body.password
+postSignInAuthentication = async (req, res, next) => {
+  console.log('Login endpoint called with data:');
+  const signInData = {
+      email: req.body.email,
+      password: req.body.password
+  };
+  console.log(signInData); 
+  console.log(req.url)
+  try {
+      let user;
+      if (signInData.email !== undefined) {
+          user = await Auth.findAll({ where: { email: signInData.email } });
       }
-      console.log(signInData)
-      
-     try{
-      let user
-      if(signInData.email!==undefined)
-        {
-         user=await Auth.findAll({where:{email:signInData.email}})
-        }
-         console.log('hello')
-       if(user && user.length!==0)
-       {
-         bcrypt.compare(signInData.password,user[0].password,(err,response)=>{
-            if(err)
-            {
-                console.log(err)
-                 
-            }
-            
-            if(response) 
-            {
-                    return  res.status(201).json({message:'Login Successfully',token:generateAccessToken(user[0].id,user[0].username,user[0].email,user[0].phone),username:user[0].username,email:user[0].email,phone:user[0].phone})
-             } 
-             else if(!response)
-                return res.status(401).json({error:'Password MisMatch'}) 
-              
-        })
+      console.log('hello');
+
+      if (user && user.length !== 0) {
+          // Use bcrypt.compare with a Promise to properly await the result
+          const passwordMatch = await new Promise((resolve, reject) => {
+              bcrypt.compare(signInData.password, user[0].password, (err, response) => {
+                  if (err) return reject(err);
+                  resolve(response);
+              });
+          });
+
+          if (passwordMatch) {
+              return res.status(201).json({
+                  message: 'Login Successfully',
+                  token: generateAccessToken(user[0].id, user[0].username, user[0].email, user[0].phone),
+                  username: user[0].username,
+                  email: user[0].email,
+                  phone: user[0].phone
+              });
+          } else {
+              // Incorrect password
+              return res.status(401).json({ error: 'Password MisMatch' });
+          }
+      } else {
+          // User not found
+          return res.status(404).json({ error: 'User Not Found' });
       }
-      else{
-        return res.status(404).json({error:'User Not Found'})
-      }
-         
-        
-     }
-     catch(error){
-         return res.status(500).json({error:error.message})
-     }
-}
+  } catch (error) {
+      console.error(error); // Log the error for debugging
+      return res.status(500).json({ error: error.message });
+  }
+};
 
 const searchCredentials=(data)=>{
    return new Promise(async(resolve,reject)=>{

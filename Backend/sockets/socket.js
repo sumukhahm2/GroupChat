@@ -1,8 +1,10 @@
 const socketEvents = (io) => {
+  console.log('initializing sockets')
     io.on('connection', (socket) => {
-      console.log(`A user has connected! SocketId: ${socket.id}`);
+      console.log('A user has connected! SocketId: '+socket.id );
   
       socket.on('join', (chatroomId) => {
+       
         socket.join(chatroomId);
       });
   
@@ -14,8 +16,16 @@ const socketEvents = (io) => {
         console.log(`SocketId: ${socket.id} has disconnected!`);
       });
   
-      socket.on('newMessage', (newMessage) => {
-        socket.broadcast.to(newMessage.chatroomId).emit('addMessage', newMessage);
+      socket.on('send-message', (newMessage) => {
+        console.log('Socket Messages '+newMessage.groupChatId)
+        const message={
+          message:newMessage.message,
+          id:newMessage.id,
+          phone:newMessage.phone,
+          sendername:newMessage.sendername,
+          createdAt:newMessage.createdAt
+        }
+        socket.broadcast.to(newMessage.groupChatId).emit('receive-message', message);
       });
     });
   };
