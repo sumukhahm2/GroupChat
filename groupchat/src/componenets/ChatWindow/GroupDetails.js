@@ -15,7 +15,7 @@ const GroupDetails=()=>{
     const navigate=useNavigate()
     const dispatch=useDispatch()
 
-      //useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
+      useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
     const groupDetails=useSelector(state=>state.chat.groupdetails)
     console.log(groupDetails)
      let currentUser=[]

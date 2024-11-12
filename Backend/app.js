@@ -100,7 +100,7 @@ app.use(morgan('tiny'))
 
 sequelize.sync()  
 .then(result=>{
-    
+        
     const port=process.env.PORT||3000
 
     
