@@ -20,8 +20,9 @@ route.get('/groupchat/groupdetails',groupchatControler.getGroupDetails)
 
 route.post('/groupchat/updateauthority',groupchatControler.postUpdateAuthority)
 
-route.post('/groupchat/addmember',groupchatControler.postAddMemberToGroup)
+route.post('/groupchat/addmember',authentication.userAuthentication,groupchatControler.postAddMemberToGroup)
 
-route.post('/groupchat/exitgroup',authentication.userAuthentication,groupchatControler.exitFromGroup)
+route.post('/groupchat/exitgroupfromcreator',authentication.userAuthentication,groupchatControler.exitFromGroup)
 
+route.post('/groupchat/exitgroup',groupchatControler.exitFromGroup)
 module.exports=route

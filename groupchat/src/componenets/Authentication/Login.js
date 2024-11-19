@@ -50,7 +50,7 @@ const Login=()=>{
 
     // API call
     response = await fetch(
-      `http://16.171.19.58:3000/groupchat/${isSignUp ? 'signup' : 'signin'}`,
+      `http://localhost:4000/groupchat/${isSignUp ? 'signup' : 'signin'}`,
       {
         method: 'POST',
         body: JSON.stringify(formData),
@@ -62,7 +62,7 @@ const Login=()=>{
 
     // Check HTTP response status
     if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
+      throw new Error(`Error: User ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -73,7 +73,7 @@ const Login=()=>{
 
     if (data.message) {
       if (isSignUp) {
-        setMessage({ type: 'success', text: data.message });
+        setMessage(data.message );
       } else {
         alert(data.message);
         dispatch(authAction.signIn({
@@ -88,7 +88,7 @@ const Login=()=>{
     }
 
   } catch (error) {
-    setError({ type: 'error', text: error.message });
+    setError(error.message);
   } finally {
     // setTimeout(() => {
     //   setError(null);

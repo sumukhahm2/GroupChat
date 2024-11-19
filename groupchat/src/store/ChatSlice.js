@@ -5,6 +5,7 @@ const defaultValue={
     groupnames:[],
     invites:[],
     groupdetails:[],
+    members:[]
     
 }
 
@@ -39,9 +40,11 @@ const ChatSlice=createSlice({
          {
             state.invites=state.invites.concat(action.payload)
          },
+         addMember(state,action){
+            state.groupdetails=state.groupdetails.concat(action.payload)
+         },
          addGroupDetails(state,action)
          {
-
             state.groupdetails=[]
            state.groupdetails=state.groupdetails.concat(action.payload)
            console.log(state.groupdetails)
@@ -50,6 +53,7 @@ const ChatSlice=createSlice({
             const index=state.groupdetails.findIndex(item=>item.authId===action.payload.id)
             console.log(index)
             const user=state.groupdetails[index]
+            console.log(user)
             if(action.payload.type==='update-admin')
            { 
             const updatedGroup={...user,isAdmin:!user.isAdmin}
@@ -62,6 +66,9 @@ const ChatSlice=createSlice({
             state.groupdetails[index]=updatedGroup
             console.log(state.groupdetails)
            }
+         },
+         joinMembers(state,action){
+            state.members=state.members.concat(action.payload)
          }
     }
 })

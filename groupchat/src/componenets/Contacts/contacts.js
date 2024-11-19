@@ -8,10 +8,11 @@ import { FaPhoneAlt } from "react-icons/fa";
 import CustomDropDown from "../ChatWindow/CustomDropDown";
 import { FaArrowCircleRight } from "react-icons/fa";
 import {useState} from 'react'
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams,useLocation } from "react-router-dom";
 import './contacts.css'
 import AddGroupForm from "../NvBar/AddGroupForm";
 import InviteGroup from "../NvBar/InviteGroup";
+import socket from '../../Socket/Socket'
 
 
 const Contacts=(props)=>{
@@ -20,8 +21,9 @@ const Contacts=(props)=>{
     contacts=useSelector(state=>state.contact.contacts)
    const [form,setForm]=useState(false)
      const navigate=useNavigate()
-  console.log(contacts)
-    useFetch('http://16.171.19.58:3000/groupchat/getcontacts','GET-CONTACTS')
+    const location=useLocation()
+  console.log(location.state)
+    useFetch('http://localhost:4000/groupchat/getcontacts','GET-CONTACTS')
     const items=['message','Send Invite','Add to Group']
 
     const selectedItem=async(item)=>{
@@ -33,7 +35,7 @@ const Contacts=(props)=>{
                 phone:item.contact,
                 groupId:props.groupId
             }
-           const response=await fetch('http://16.171.19.58:3000/groupchat/addmember',
+           const response=await fetch('http://localhost:4000/groupchat/addmember',
             {
                 method:'POST',
                 body:JSON.stringify(memberData),
@@ -72,7 +74,30 @@ const Contacts=(props)=>{
       if(contacts.length===0)
         return <h1>No Contacts Found</h1>
       
+    const handleAddMember=async()=>{
+        console.log(location.state)
+         const groupData={
+          groupId:location.state.id,
+          members:contactsData,
+          adminPhone:location.state.phone
+         }
+         const response=await fetch('http://localhost:4000/groupchat/addmember',{
+          method:'POST',
+          body:JSON.stringify(groupData),
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':localStorage.getItem('token')
+          }
+         })
 
+         const data=await response.json()
+         console.log(data)
+         if(data)
+         {
+            navigate(`/home/groupdetails/${location.state.id}`)
+            socket.emit('join-chat',{groupId:location.state.id,phoneNumber:contactsData,type:'added-members'})
+         }
+    }
     return(
         
        <div className={props.type==='invite-group'?"bg-white  shadow-sm p-2 z-2 w-75 ":"bg-white m-3 shadow-sm p-2  "}>
@@ -108,7 +133,7 @@ const Contacts=(props)=>{
             <FaArrowCircleRight className="fs-1 " style={{color:'green',cursor:'pointer'}} onClick={handleCreateGroup}/>
             </Col>}
             {props.filter && props.groupId!==null && <Col className='text-end'>
-            <Button className="bg-success" tyle={{cursor:'pointer'}}>+</Button>
+            <Button className="bg-success" tyle={{cursor:'pointer'}} onClick={handleAddMember}>+</Button>
             </Col>}
         </div>
        

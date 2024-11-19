@@ -4,10 +4,11 @@ import SideBar from "./sideBar"
 import './GroupDetails.css'
 import { Button, Col, Row,Dropdown } from "react-bootstrap"
 import { useParams } from "react-router-dom"
-import {useState} from 'react'
+import {useState,useEffect} from 'react'
 import { useNavigate } from "react-router-dom"
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { chatAction } from "../../store/ChatSlice"
+import socket from '../../Socket/Socket.js'
 
 const GroupDetails=()=>{
 
@@ -15,7 +16,29 @@ const GroupDetails=()=>{
     const navigate=useNavigate()
     const dispatch=useDispatch()
 
-      useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
+     useEffect(()=>{
+        socket.emit('join',params.groupid)
+
+
+        socket.on('updated-info', (incomingMessage) => {
+            console.log(incomingMessage)
+            dispatch(chatAction.updateGroupDetails(incomingMessage))
+          });
+          
+          socket.on('updated-group', (incomingMessage) => {
+            console.log(incomingMessage)
+            dispatch(chatAction.updateGroupDetails(incomingMessage))
+          });
+          
+         return () => {
+              socket.off('updated-info');
+              socket.off('updated-group');
+              
+            };
+
+     },[params.groupid])
+
+      useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${params.groupid}`,'GROUP-DETAILS')
     const groupDetails=useSelector(state=>state.chat.groupdetails)
     console.log(groupDetails)
      let currentUser=[]
@@ -31,7 +54,7 @@ const GroupDetails=()=>{
             authid:datas.id,
             isAdmin:datas.isAdmin
         }
-        const response=await fetch(`http://16.171.19.58:3000/groupchat/updateauthority`,
+        const response=await fetch(`http://localhost:4000/groupchat/updateauthority`,
             {
                 method:'POST',
                 body:JSON.stringify(updatingData),
@@ -45,6 +68,7 @@ const GroupDetails=()=>{
         if(data)
         {
             dispatch(chatAction.updateGroupDetails({id:datas.id,type:'update-admin'}))
+            socket.emit('update-group',data)
         }
         console.log(data)
     }
@@ -58,7 +82,7 @@ const GroupDetails=()=>{
       let response
       if(authId===currentUser[0].authId)
       {
-       response=await fetch('http://16.171.19.58:3000/groupchat/exitgroup',{
+       response=await fetch('http://localhost:4000/groupchat/exitgroupfromcreator',{
         method:'POST',
         body:JSON.stringify(exitData),
         headers:{
@@ -68,7 +92,7 @@ const GroupDetails=()=>{
       })
     }
     else{
-        response=await fetch('http://16.171.19.58:3000/groupchat/exitgroup',{
+        response=await fetch('http://localhost:4000/groupchat/exitgroup',{
             method:'POST',
             body:JSON.stringify(exitData),
             headers:{
@@ -82,6 +106,7 @@ const GroupDetails=()=>{
       if(data.message)
       {
         dispatch(chatAction.updateGroupDetails({id:authId,type:'update-member'}))
+         socket.emit('leave',{phoneNumber:localStorage.getItem('phone'),type:'update-member',groupId:groupid})
       }
       
     

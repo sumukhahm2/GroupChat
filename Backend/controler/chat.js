@@ -6,18 +6,18 @@ const GroupChat = require('../models/groupchat')
 
 
 postMessages=async(req,res)=>{
-     console.log(req.body)
-   
+     console.log('in chat')
+      console.log()
     try{
          
         //console.log(data)
         const chatData={
-            message:req.body.message,
+            message:req.locations?JSON.stringify(req.locations):req.body.message,
             sendername:req.user.username,
             phone:req.user.phone,
-            groupname:req.body.groupname,
+            groupname:req.query.groupname?req.query.groupname:req.body.groupname,
             authId:req.user.id,
-            groupchatId:req.body.groupId,
+            groupchatId:req.query.groupid?req.query.groupid:req.body.groupId,
           
         }
        const response=await Chat.create({...chatData})
@@ -31,6 +31,7 @@ postMessages=async(req,res)=>{
          throw new Error("Something went Wrong")
     }
     catch(error){
+      console.log(error)
        res.status(500).json({error:error.message})
     }
 

@@ -8,59 +8,104 @@ import { Link, useParams,useSearchParams,useNavigate} from 'react-router-dom'
 import SideBar from './sideBar'
 import useCheckMobileScreen from './useCheckMobileScreen'
 import socket from '../../Socket/Socket'
-const ChatSpace=()=>{
+import { MdAttachFile } from "react-icons/md";
+import Message from './Message'
+import { useMemo } from 'react';
 
+const ChatSpace=()=>{
+  const [searchParams]=useSearchParams()
+  const groupId = useMemo(() => searchParams.get('id'), [searchParams]);
+  const phoneNumber=useMemo(() =>localStorage.getItem('phone'),[searchParams]);
+
+  let id=0;
+      
+  const msgData=JSON.parse(localStorage.getItem('messages'))
+ 
+
+  if(Array.isArray(msgData))
+  {
+   const msgLength=msgData.length
+  
+  id=msgData[msgLength-1].id
+  console.log(id)
+}
+  useFetch(`http://localhost:4000/groupchat/allchats?lastmessageid=${id}&groupchatid=${groupId}`,'ALL_CHATS',groupId)
+  useFetch(`http://localhost:4000/groupchat/groupdetails?groupid=${groupId}`,'GROUP-DETAILS')
     const chatRef=useRef()
     const phoneRef=useRef()
     const [error,setError]=useState(null)
     const [inviteForm,setInviteForm]=useState(false)
-    const [searchParams]=useSearchParams()
+    const [file,setFile]=useState(null)
+    
     const dispatch=useDispatch()
     const param=useParams()
     const navigate=useNavigate()
     
    
-      
-
-    let id=0;
-      console.log(param.groupname)
-      console.log(searchParams.get('created'))
-    const msgData=JSON.parse(localStorage.getItem('messages'))
-    console.log(Array.isArray(msgData))
-
-    if(Array.isArray(msgData))
-    {
-     const msgLength=msgData.length
-    
-    id=msgData[msgLength-1].id
-    console.log(id)
- }
- useEffect(() => {
- socket.emit('join', searchParams.get('id'));
-
-  socket.on('receive-message', (incomingMessage) => {
-    console.log('receive '+incomingMessage)
-    dispatch(chatAction.addMessages(incomingMessage.message));
-  });
-
-  // Cleanup listener on component unmount
- return () => {
-      socket.off('receive-message');
-    };
-  }, [searchParams.get('id')]);
- 
- useFetch(`http://16.171.19.58:3000/groupchat/allchats?lastmessageid=${id}&groupchatid=${searchParams.get('id')}`,'ALL_CHATS',searchParams.get('id'))
- useFetch(`http://16.171.19.58:3000/groupchat/groupdetails?groupid=${searchParams.get('id')}`,'GROUP-DETAILS')
- const isMobile=useCheckMobileScreen()
-  console.log(isMobile)
+    const joinedMembers=useSelector(state=>state.chat.members)
+    console.log(joinedMembers)
+   
     const messages=useSelector(state=>state.chat.messages)
     const groupDetails=useSelector(state=>state.chat.groupdetails)
+   
     let currentUser=[]
+    let datas=[]
      if(groupDetails.length>0)
      currentUser=groupDetails.filter(user=>
         user.name.phone===localStorage.getItem('phone'))
-    console.log(searchParams.get('created'))
-    console.log(messages)
+
+     
+
+    const socketJoinData={
+      groupId:groupId,
+      phoneNumber:[phoneNumber],
+      
+    }
+    
+ let socketMessages=[]
+ useEffect(() => {
+  if(groupId)
+  {
+    socket.emit('join-chat', socketJoinData);
+    console.log('joining '+groupId)
+  }
+ 
+  
+
+     socket.on('receive-message', (incomingMessage) => {
+    console.log(incomingMessage)
+    if(currentUser.length>0 && currentUser[0].isMember)
+    dispatch(chatAction.addMessages(incomingMessage.message));
+    });
+  
+
+
+  socket.on('members', (incomingMessage) => {
+    console.log(incomingMessage)
+    diapatch(chatAction.joinMembers(incomingMessage))
+  });
+  
+  
+  // Cleanup listener on component unmount
+ return () => {
+       socket.emit('leave', {groupId:groupId,phoneNumber:localStorage.getItem('phone')});
+      console.log('leaving group id '+groupId)
+      socket.off('receive-message'); 
+      socket.off('members');
+     
+      
+    };
+  }, [groupId]);
+ 
+  
+ 
+ 
+ const isMobile=useCheckMobileScreen()
+  console.log(isMobile)
+   
+    console.log(groupDetails)
+    
+        console.log(currentUser)
     //const [error,setError]=useState(null)
    
    
@@ -70,11 +115,12 @@ const ChatSpace=()=>{
         const chatData={
          message:chatRef.current.value,
          token:localStorage.getItem('token'),
-         groupId:searchParams.get('id'),
+         groupId:groupId,
          groupname:param.groupname
         }
+        console.log(chatData)
         try{
-             const response=await fetch('http://16.171.19.58:3000/groupchat/send',{
+             const response=await fetch('http://localhost:4000/groupchat/send',{
                  method:'POST',
                  body:JSON.stringify(chatData),
                  headers:{
@@ -91,8 +137,9 @@ const ChatSpace=()=>{
              {
                dispatch(chatAction.addMessages(data.message))
                const sendMessage={
-                groupChatId:searchParams.get('id'),
-                message:data.message
+                groupChatId:groupId,
+                message:data.message,
+                
                }
                if(socket.connected)
                socket.emit('send-message',sendMessage)
@@ -107,10 +154,15 @@ const ChatSpace=()=>{
         
      }
 
-    //  socket.on('send-message', (newMessage) => {
-    //   console.log('New message received:', newMessage);
-    //   dispatch(chatAction.addMessages(newMessage)); // Add to local state
-    // });
+    const addMember=()=>{
+      const data={
+         id:groupId,
+         phone:localStorage.getItem('phone')
+      }
+      navigate('/search',{state:data})
+    }
+
+
 
     const handleInviteLink=async(event)=>{
       event.preventDefault()
@@ -119,8 +171,8 @@ const ChatSpace=()=>{
         groupname:param.groupname
       }
       try{
-        console.log(searchParams.get('id'))
-         const response=await fetch(`http://16.171.19.58:3000/groupchat/invite/${searchParams.get('id')}`,
+        console.log(groupId)
+         const response=await fetch(`http://localhost:4000/groupchat/invite/${groupId}`,
             {
                 method:'POST',
                 body:JSON.stringify(inviteData),
@@ -144,42 +196,91 @@ const ChatSpace=()=>{
       }
 
     }
+
+    const handleFileChange = async (e) => {
+      console.log(e.target.files)
+      const formData = new FormData();
+      try {
+        const selectedFile = e.target.files;
+        console.log(selectedFile)
+        if (!selectedFile) {
+          console.error("No file selected.");
+          return;
+        }
+    
+        // Create a FormData object to handle file upload
+        for (let i = 0; i < selectedFile.length; i++) {
+         
+          formData.append('files', selectedFile[i]);
+      }
+      
+      
+        // Send the file to the server
+        const response = await fetch(`http://localhost:4000/groupchat/upload?groupid=${groupId}&groupname=${param.groupname}`, {
+          method: "POST",
+          body: formData,
+          headers: {
+            // Only include authorization header if needed
+            'Authorization': localStorage.getItem("token"),
+          },
+        });
+    
+        // Parse the response
+        if (!response.ok) {
+          throw new Error(`Failed to upload file: ${response.statusText}`);
+        }
+    
+        const data = await response.json();
+        console.log("File uploaded successfully:", data);
+        if(data && data.message)
+          {
+            dispatch(chatAction.addMessages(data.message))
+          }
+      } catch (error) {
+        console.error("Error uploading file:", error.message);
+      }
+    };
+    
+    const attachFiles=()=>{
+       document.getElementById('fileInput').click()
+    }
+
+    const verifyCurrentMember=(phone)=>{
+      if(currentUser.length>0 && phone===searchParams.get('created'))
+        return true
+      else
+      return false
+    }
     //const path=`/home/:${param.groupname}/groupdetails`
-    const pth=`/home/groupdetails/${searchParams.get('id')}`
+    const pth=`/home/groupdetails/${groupId}`
     const groupBtnClass=isMobile?'text-center text-success border border-ridge border-success rounded   w-100':'text-center text-success border border-ridge border-success rounded w-25'
-    const chatsClass=isMobile?'fw-bolder border rounded mb-2 w-75 h-auto mw-100 mx-5 shadow-sm':'fw-bolder border rounded mb-2 w-50 h-25 mw-100 mx-5 shadow-sm'
+    const isYou=currentUser.length>0 && currentUser[0].name.phone===searchParams.get('created')
     const msgFormClass=isMobile?'d-flex flex-row  w-75 position-fixed':'d-flex flex-row  w-50'
     return(
         <SideBar isMobile={isMobile} isHide={true}>
-           {searchParams.get('id') && <Col className="chatspace">
+           {groupId && <Col className="chatspace">
              <Link to={pth} className=''><h2 className='w-100'>{param.groupname}</h2></Link>
              {error && <p>{error}</p>}
             
                <div className='chats'>
                 <div className='border border-ridge  my-2 h-50 mx-2 bg-white'>
                   <h4 className='text-center'>{param.groupname}</h4>
-                  <h5 className='text-center text-secondary mb-2'>{currentUser.length>0 && currentUser[0].name.phone===searchParams.get('created')?'You':`${searchParams.get('created')}`} Created The Group</h5>
+                  <h5 className='text-center text-secondary mb-2'>{currentUser.length>0 && verifyCurrentMember(currentUser[0].name.phone)?'You':`${searchParams.get('created')}`} Created The Group</h5>
                   <div className='d-flex justify-content-center align-items-center  mb-2' role='button'>
-                  <div className={groupBtnClass} onClick={()=>{navigate(`/home/groupdetails/${searchParams.get('id')}`)}}>Group Details</div>
+                  <div className={groupBtnClass} onClick={()=>{navigate(`/home/groupdetails/${groupId}`)}}>Group Details</div>
                   </div>
                  {currentUser.length>0 && currentUser[0].isMember && <div className='d-flex justify-content-center  align-items-center' role='button'>
-                  <div className={groupBtnClass} role='button' onClick={()=>navigate('/search',{state:searchParams.get('id')})}>Add Member</div>
+                  <div className={groupBtnClass} role='button' onClick={addMember}>Add Member</div>
                   </div>}
                 </div>
                 <div>
-                <p className='text-secondary fw-bolder w-75'> {currentUser.length>0 &&  currentUser[0].name.phone===searchParams.get('created')?'You joined':`${searchParams.get('created')} added you`}</p>
         
+                {groupDetails.map((data)=><>{currentUser[0].name.phone!==data.name.phone && <p className='text-secondary fw-bolder w-75'>{`${verifyCurrentMember(currentUser[0].name.phone)?'You':searchParams.get('created')} added ${verifyCurrentMember(data.name.phone)?'you':data.name.phone}` }</p>}</>)}
                 {messages && messages.map(msg=>
 
-                <div className={currentUser.length>0 && currentUser[0].name.phone===msg.phone?'d-flex  flex-column align-items-end':'d-flex flex-column'}>
-                <div className={chatsClass} style={currentUser.length>0 && currentUser[0].name.phone===msg.phone?{background:'#98FB98'}:{background:'white'}} >
-                   
-                  <div className='d-flex justify-content-between mx-2'><h6 style={{color:'#FF1493'}}>{msg.sendername }</h6> <h6 className='text-secondary  fw-bold ' style={{fontSize:'13px'}}>{ msg.phone}</h6></div>
-                   <div className='text-start mx-2'><h6 >{msg.message}</h6></div>
-                  
-                   <div className='text-end mx-2 fw-light ' style={{fontSize:'13px'}}>{new Date(msg.createdAt).getHours()+':'+new Date(msg.createdAt).getMinutes()}</div>
-                   </div>
-                   </div>
+                   <>
+                    <Message msg={msg} currentUser={currentUser} isMobile={isMobile}/>
+                   </>
                 )}
                 </div>
                 </div>
@@ -187,7 +288,7 @@ const ChatSpace=()=>{
            <div >
            
              <div className='invite-button'>
-                {!inviteForm && searchParams.get('id') && currentUser.length>0 && currentUser[0].isMember && <Button className='btn-secondary h-50' onClick={()=>setInviteForm(true)}>Invite Using Link</Button>}
+                {!inviteForm && groupId && currentUser.length>0 && currentUser[0].isMember && <Button className='btn-secondary h-50' onClick={()=>setInviteForm(true)}>Invite Using Link</Button>}
                 {inviteForm && <Form  onSubmit={handleInviteLink}>
                     <Form.Group>
                       
@@ -198,8 +299,12 @@ const ChatSpace=()=>{
                 </Form>}
              </div>
              {currentUser.length>0 && !currentUser[0].isMember && <div className='text-danger bg-warning text-center w-75 fs-5'>You Are No Longer A Member Of This Group</div>}
-              {searchParams.get('id') && currentUser.length>0 && currentUser[0].isMember && <Form className={msgFormClass} onSubmit={handleSendMessage} >
-                     <Form.Control type="text" name="chat" ref={chatRef} className=' border border-black' />
+              {groupId && currentUser.length>0 && currentUser[0].isMember && <Form className={msgFormClass} onSubmit={handleSendMessage} >
+                    <Form.Group className='border border-ridge border-black d-flex rounded flex-grow-1 justify-content-end'>
+                     <Form.Control type="text" name="chat" ref={chatRef} className='form-control-plaintext'/>
+                     <input  type="file" id="fileInput" className='d-none'  onChange={handleFileChange} multiple/>
+                     <MdAttachFile className='fs-3 attach' onClick={attachFiles}/>
+                     </Form.Group>
                  <Button className="mx-2" type="submit" >Send</Button>
               </Form>}
             </div>

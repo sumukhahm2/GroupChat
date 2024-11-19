@@ -12,7 +12,7 @@ const Chat=sequelize.define('chat',{
         primaryKey:true
     },
     message:{
-        type:Sequelize.STRING,
+        type:Sequelize.TEXT,
         allowNull:false,  
     },
     sendername:{

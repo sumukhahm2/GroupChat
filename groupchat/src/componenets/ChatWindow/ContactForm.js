@@ -17,7 +17,7 @@ const ContactForm=()=>{
         phone:phoneRef.current.value
       }
        try{
-           const response=await  fetch('http://16.171.19.58:3000/groupchat/addcontact',{
+           const response=await  fetch('http://localhost:4000/groupchat/addcontact',{
             method:'POST',
             body:JSON.stringify(contactData),
             headers:{
@@ -46,7 +46,7 @@ const ContactForm=()=>{
                 {message && <p>{message}</p>}
                 <Form.Group>
                     <Form.Label>Name</Form.Label>
-                    <Form.Control type="text" ref={nameRef}/>
+                    <Form.Control type="text" ref={nameRef} className="border border-ridge "/>
                 </Form.Group>
                 <Form.Group>
                     <Form.Label>Phone Number</Form.Label>

@@ -17,7 +17,7 @@ import useCheckMobileScreen from '../ChatWindow/useCheckMobileScreen';
 
 
 function NavBar() {
-    useFetch('http://16.171.19.58:3000/groupchat/invites','INVITES')
+    useFetch('http://localhost:4000/groupchat/invites','INVITES')
     const isMobile=useCheckMobileScreen()
 
     const [showForm,setForm]=useState(false)
@@ -72,7 +72,7 @@ function NavBar() {
         </Navbar.Collapse>
       </Container>
     </Navbar>
-    {showForm && <AddGroupForm setForm={setForm}/>}
+    {showForm && <AddGroupForm setForm={()=>setForm(false)}/>}
     {isInvite && <InviteGroup/>}
     {showContactForm && <ContactForm/>}
     </>

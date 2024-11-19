@@ -3,6 +3,7 @@ const express=require('express')
 const dotenv=require('dotenv')
 dotenv.config()
 
+const cronJob=require('./controler/cronsjob')
 
 const http= require('http')
 
@@ -51,8 +52,9 @@ const server = http.createServer(app);
 
 const io = socketIo(server,{
     cors: {
-      origin: "http://16.171.19.58:3000",
-      methods: ["GET", "POST"]
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"],
+      "ExposeHeaders": ["Content-Disposition"],
     }
   });
 console.log('socket events')
@@ -77,35 +79,41 @@ app.use(contactRoute)
 Auth.belongsToMany(GroupChat,{ through: AuthGroupChat })
  GroupChat.belongsToMany(Auth,{ through: AuthGroupChat })
 
+ AuthGroupChat.belongsTo(Auth, { foreignKey: 'authId' }); 
+Auth.hasMany(AuthGroupChat, { foreignKey: 'authId' });
+
+AuthGroupChat.belongsTo(GroupChat, { foreignKey: 'groupchatId' });
+GroupChat.hasMany(AuthGroupChat, { foreignKey: 'groupchatId' });
+
  GroupChat.hasMany(Chat)
  Chat.belongsTo(GroupChat) 
 
  Auth.hasMany(InviteLinks)
  InviteLinks.belongsTo(Auth)
 
- const _dirname=path.dirname("")
-const buildPath=path.join(_dirname,"../groupchat/build")
+//  const _dirname=path.dirname("")
+// const buildPath=path.join(_dirname,"../groupchat/build")
 
-app.use(express.static(buildPath))
+// app.use(express.static(buildPath))
 
-app.use((req,res)=>{
-    res.sendFile(
-        path.join(__dirname,"../groupchat/build/index.html")
-    )
-})
+// app.use((req,res)=>{
+//     res.sendFile(
+//         path.join(__dirname,"../groupchat/build/index.html")
+//     )
+// })
    
 app.use(helmet()) 
 app.use(morgan('tiny'))
 
-
+cronJob()
 sequelize.sync()  
 .then(result=>{
         
-    const port=process.env.PORT||3000
+    const port=process.env.PORT||4000
 
     
     server.listen(port, () => {
-        console.log(`Sample app listening at http://16.171.19.58:${port}`)
+        console.log(`Sample app listening at http://localhost:${port}`)
      })
 })
 .catch(error=>{

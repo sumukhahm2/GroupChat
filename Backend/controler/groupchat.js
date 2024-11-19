@@ -6,6 +6,73 @@ const InviteLinks=require('../models/invitelinks')
 const AuthGroupChat=require('../models/AuthGroupChats')
 
 
+const bulkAddMembers = async (group_members, groupchatId) => {
+  try {
+    const membersToAdd = [];
+    const updatesToPerform = [];
+
+    const users = await Promise.all(
+      group_members.map((phone) => Auth.findOne({ where: { phone } }))
+    );
+
+    for (let user of users) {
+      // Skip if user does not exist
+      if (!user) continue;
+
+      // Check if the user is already a member of the group
+      const isMember = await AuthGroupChat.findOne({
+        where: { authId: user.id, groupchatId },
+      });
+
+      if (!isMember) {
+        // Prepare new member for bulk insert
+        membersToAdd.push({
+          authId: user.id,
+          groupchatId,
+        });
+      } else {
+        // Collect updates for existing members
+        updatesToPerform.push(
+          isMember.update({ isMember: true }) // Promise for updating `isMember`
+        );
+      }
+    }
+
+    console.log(`Members to add:`, membersToAdd);
+
+    // Perform bulk create for new members
+     await AuthGroupChat.bulkCreate(membersToAdd);
+
+    // Perform all updates in parallel
+    await Promise.all(updatesToPerform);
+    // console.log(Auth.associations); // Should show GroupChat as an association
+    // console.log(GroupChat.associations); // Should show Auth as an association
+    const groupMembers = await AuthGroupChat.findAll({
+      where: { groupchatId },
+      attributes:['authId','groupchatId'],
+      include: [
+        {
+          model: Auth, // Assuming `Auth` is the model where member names are stored
+          attributes: ['phone'],
+        },
+      ],
+    });
+
+    // Extract member names
+    const memberNames = groupMembers.map((member) => member.auth.phone);
+
+    console.log('Member Names:', groupMembers);
+
+    
+
+    // Return created members as plain objects (optional)
+    return memberNames
+  } catch (error) {
+    console.error('Error in bulkAddMembers:', error);
+    throw error; // Throw error so it can be handled by the caller
+  }
+};
+
 postCreateGroup=async(req,res,next)=>{
    // console.log(req.user)
     const groupData={
@@ -18,23 +85,12 @@ postCreateGroup=async(req,res,next)=>{
        await req.user.addGroupchat(groupchat,{through:{isAdmin:true,isMember:true}})
        const group_members=req.body.members
        console.log(group_members)
-       var members=[]
-         
-          for(let i=0;i<group_members.length;i++)
-          {
-            const user=await Auth.findOne({where:{phone:group_members[i]}})
-            const obj={
-              authId:user.id,
-              groupchatId:groupchat.id
-            }
-            members.push(obj)
-          }
-          console.log(members)
-          await AuthGroupChat.bulkCreate(members)
-        
+       data=await bulkAddMembers(group_members,groupchat.id)
+      
+        console.log('groupData:-- '+JSON.stringify(data))
         if(groupchat)
         {
-           return res.status(201).json({message:'Group Created SuccessFully',groupId:groupchat.dataValues.id})
+           return res.status(201).json({message:'Group Created SuccessFully',groupInfo:{...groupchat.dataValues,members:data}})
         }
     }
     catch(error)
@@ -43,6 +99,26 @@ postCreateGroup=async(req,res,next)=>{
     }
    
 } 
+
+postAddMemberToGroup=async (req,res,next)=>{
+    const groupId= req.body.groupId
+    const members=req.body.members
+     const adminPhone=req.body.adminPhone
+    console.log(req.body)
+  try{
+     const group=await req.user.getGroupchats({where:{id:groupId}})
+     console.log(group)
+     const data=await bulkAddMembers(members,groupId) 
+     console.log(data)
+     if(data)
+     {
+      res.send({message:'Members Added Successfully',data:data})
+     }
+  }
+  catch(error){
+      console.log(error)
+  }
+}
 
 getGroupNames=async (req,res,next)=>{
     try{
@@ -81,30 +157,6 @@ postJoinGroup=async(req,res,next)=>{
     }
 }
 
-postAddMemberToGroup=async(req,res,next)=>{
-    try{
-        const phone=req.body.phone
-        const groupId=req.body.groupId
-      const user=await Auth.findAll({where:{phone:phone}})
-     
-       //console.log(user)
-       if(user.length>0)
-       {
-          const group=await GroupChat.findOne({where:{id:groupId}})
-
-             await user[0].addGroupchat(group,{through:{isAdmin:false,isMember:true}})
-            return  res.status(201).json({message:'Member Added Successfully'})
-
-       }
-       else
-         return res.status(404).json({error:'Usser Not Registered in GroupChat App'})
-
-    }
-    catch(error)
-    {
-        console.log(error)
-    }
-}
 
 sendInviteLink=async(req,res,next)=>{
     const groupId=req.params.groupid
@@ -118,7 +170,7 @@ sendInviteLink=async(req,res,next)=>{
 
           console.log(userData)
           const userDetails={
-            inviteurl:`http://16.171.19.58:3000/groupchat/joingroup/${groupId}`,
+            inviteurl:`http://localhost:4000/groupchat/joingroup/${groupId}`,
             inviteuser:req.user.username,
             invitephone:req.user.phone,
             authId:userData.id,
@@ -161,10 +213,16 @@ getGroupDetails=async(req,res,next)=>{
    const groupid=req.query.groupid
     try{
         const groupDetails=await AuthGroupChat.findAll({where:{groupchatId:groupid},
-            attributes:['authId','isAdmin','isMember']
+            attributes:['authId','isAdmin','isMember'],
+            // include:[
+            //   {
+            //     model:auth,
+            //     attributes:['username','phone']
+            //   }
+            // ]
             }
         )
-       //console.log('GROUP_DETAILS'+groupDetails)
+       console.log('GROUP_DETAILS'+groupDetails)
      let usernames=[]
         for(let user=0;user<groupDetails.length;user++)
         {
@@ -193,11 +251,11 @@ postUpdateAuthority=async(req,res,next)=>{
 
        
        const authgroupchat=await AuthGroupChat.update({isAdmin:!isAdmin},{where:{authId:authId,groupChatId:groupid}})
-       //console.log(authgroupchat)
+       console.log(authgroupchat)
        
        if(authgroupchat)
        {
-       return  res.status(201).json({data:authgroupchat})
+       return  res.status(201).json({isAdmin:!isAdmin,groupId:groupid,id:authId,type:'update-admin'})
        }
     }
     catch(error){
@@ -216,7 +274,7 @@ exitFromGroup=async (req,res,next)=>{
         else 
         {
            
-          const authId=req.user.authId
+          const authId=req.body.authId
           //console.log(authId)
          
           response=await AuthGroupChat.update({isMember:false},{where:{authId:authId,groupchatId:groupId}})

@@ -47,7 +47,7 @@ postSignUpAuthentication=async(req,res,next)=>{
 
     }
     catch(error){
-       // console.log(error.message)
+        console.log(error.message)
         return res.status(500).json({error:error.message})
     } 
 }

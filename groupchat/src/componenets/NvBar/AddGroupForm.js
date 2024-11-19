@@ -1,15 +1,17 @@
 import { Form,Button } from "react-bootstrap"
-import {useRef} from 'react'
+import {useRef,useState,useEffect} from 'react'
 import { useDispatch } from "react-redux"
 import { chatAction } from "../../store/ChatSlice"
 import SideBar from "../ChatWindow/sideBar"
-import { useLocation } from "react-router-dom"
+import { useLocation,useNavigate} from "react-router-dom"
+import socket from '../../Socket/Socket'
 const AddGroupForm=(prop)=>{
      
     const groupNameRef=useRef()
     const dispatch=useDispatch()
    const location=useLocation()
-
+   const navigate=useNavigate()
+   const [created,setCreated]=useState(null)
    console.log(location.state)
 
    
@@ -21,7 +23,7 @@ const AddGroupForm=(prop)=>{
           phone:localStorage.getItem('phone')
          }
         try{
-          const response=await fetch('http://16.171.19.58:3000/groupchat/creategroup',{
+          const response=await fetch('http://localhost:4000/groupchat/creategroup',{
             method:'POST',
             body:JSON.stringify(groupData),
             headers:{
@@ -34,10 +36,12 @@ const AddGroupForm=(prop)=>{
           console.log(data)
           if(data && data.message)
           {
-            alert(`Congradulations ${groupData.groupname} created successfully`)
-             dispatch(chatAction.addGroup({...groupData,id:data.groupId}))
-             prop.setForm(false)
-
+            
+           setCreated(`Congradulations ${groupData.groupname} created successfully`)
+           
+             dispatch(chatAction.addGroup(data.groupInfo))
+              socket.emit('user',{members:location.state,id:data.groupInfo})
+              
           }
             
         }
@@ -53,7 +57,7 @@ const AddGroupForm=(prop)=>{
 
     return(
         <SideBar>
-        <div className='border border-dark p-2 rounded w-50' style={{background:'#DAF7A6'}}><Form onSubmit={handleCreateGroup} className='p-2'>
+       {!created && <div className='border border-dark p-2 rounded w-50' style={{background:'#DAF7A6'}}><Form onSubmit={handleCreateGroup} className='p-2'>
         <Form.Group>
             <Form.Text><h2 className="text-success">Create Group</h2></Form.Text>
             
@@ -62,7 +66,8 @@ const AddGroupForm=(prop)=>{
             <Button type='submit' variant="success">Create</Button>
         </Form.Group>
     </Form>
-    </div>
+    </div>}
+    {created && <h3>{created}</h3>}
     </SideBar>
     )
 }
